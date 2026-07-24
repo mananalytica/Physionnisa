@@ -14,7 +14,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "pg": "8.13.1",
-    "@vercel/functions": "1.5.2"
+    "@vercel/functions": "^3.7.5"
   },
   "devDependencies": {
     "typescript": "5.6.3",
