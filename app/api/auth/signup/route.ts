@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/password";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/userAuth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   if (!isDbConfigured()) {

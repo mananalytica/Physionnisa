@@ -4,6 +4,7 @@ import { verifyPassword } from "@/lib/password";
 import { createSessionToken, SESSION_COOKIE, type SessionRole } from "@/lib/userAuth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type UserRow = { id: string; password_hash: string; role: SessionRole };
 

@@ -3,6 +3,7 @@ import { isDbConfigured, query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type BookingRow = { id: string; user_id: string | null; specialist_id: string | null };
 

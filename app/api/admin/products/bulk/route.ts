@@ -3,6 +3,7 @@ import { isDbConfigured, query } from "@/lib/db";
 import { parseCsv } from "@/lib/csv";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Expects a raw CSV body (text/csv or text/plain) with a header row. Suggested columns:
