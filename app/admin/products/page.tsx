@@ -233,7 +233,7 @@ export default function AdminProductsPage() {
         ) : (
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
-              <tr className="border-b border-black/10 text-xs uppercase text-muted">
+              <tr className="border-b border-line text-xs uppercase text-muted">
                 <th className="pb-2">Name</th>
                 <th className="pb-2">Category</th>
                 <th className="pb-2">Price</th>
@@ -243,7 +243,7 @@ export default function AdminProductsPage() {
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p.id} className="border-b border-black/5">
+                <tr key={p.id} className="border-b border-line">
                   <td className="py-3">
                     <p className="font-medium text-ink">{p.name}</p>
                     <p className="text-xs text-muted">/{p.slug}</p>

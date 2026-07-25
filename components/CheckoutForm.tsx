@@ -6,26 +6,56 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { track } from "@/lib/dataLayer";
 import { CHECKOUT_TAX_RATE } from "@/lib/data";
+import { validateEmail, validatePhone, validateAddress, formatAddress } from "@/lib/addressValidator";
 
 function formatPKR(v: number) {
   return `Rs ${v.toLocaleString("en-PK")}`;
 }
+
+type Errors = Record<string, string>;
 
 export default function CheckoutForm() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Errors>({});
+  const [country, setCountry] = useState("Pakistan");
 
   const tax = Math.round(subtotal * CHECKOUT_TAX_RATE);
   const total = subtotal + tax;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("submitting");
     setError(null);
 
     const form = new FormData(e.currentTarget);
+    const fields = {
+      fullName: String(form.get("fullName") || ""),
+      email: String(form.get("email") || ""),
+      phone: String(form.get("phone") || ""),
+      addressLine1: String(form.get("addressLine1") || ""),
+      addressLine2: String(form.get("addressLine2") || ""),
+      city: String(form.get("city") || ""),
+      postalCode: String(form.get("postalCode") || ""),
+      country,
+    };
+
+    const fieldErrors: Errors = { ...validateAddress(fields) };
+    const emailErr = validateEmail(fields.email);
+    if (emailErr) fieldErrors.email = emailErr;
+    const phoneErr = validatePhone(fields.phone, country);
+    if (phoneErr) fieldErrors.phone = phoneErr;
+    if (!fields.fullName.trim()) fieldErrors.fullName = "Full name is required.";
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrors({});
+    setStatus("submitting");
+
     const payload = {
       items: items.map((i) => ({
         productId: i.productId,
@@ -36,10 +66,15 @@ export default function CheckoutForm() {
       subtotal,
       tax,
       total,
-      fullName: String(form.get("fullName") || ""),
-      email: String(form.get("email") || ""),
-      phone: String(form.get("phone") || ""),
-      shippingAddress: String(form.get("shippingAddress") || ""),
+      fullName: fields.fullName,
+      email: fields.email,
+      phone: fields.phone,
+      addressLine1: fields.addressLine1,
+      addressLine2: fields.addressLine2,
+      city: fields.city,
+      postalCode: fields.postalCode,
+      country: fields.country,
+      shippingAddress: formatAddress(fields),
     };
 
     try {
@@ -91,31 +126,65 @@ export default function CheckoutForm() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-      <form onSubmit={handleSubmit} className="card p-6 md:p-8">
-        <h2 className="text-xl font-semibold text-ink">Shipping &amp; Contact Details</h2>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+      <form onSubmit={handleSubmit} noValidate className="card p-6 md:p-8">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">Contact Details</p>
+        <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <div>
             <label className="label" htmlFor="fullName">Full Name</label>
-            <input id="fullName" name="fullName" required className="input" placeholder="Sarah Jenkins" />
+            <input id="fullName" name="fullName" className={`input ${errors.fullName ? "input-error" : ""}`} placeholder="Sana Malik" />
+            {errors.fullName && <p className="field-error">{errors.fullName}</p>}
           </div>
           <div>
             <label className="label" htmlFor="email">Email Address</label>
-            <input id="email" name="email" type="email" required className="input" placeholder="sarah@example.com" />
-          </div>
-          <div>
-            <label className="label" htmlFor="phone">Phone Number</label>
-            <input id="phone" name="phone" required className="input" placeholder="+92 300 1234567" />
+            <input id="email" name="email" type="email" className={`input ${errors.email ? "input-error" : ""}`} placeholder="sana@example.com" />
+            {errors.email && <p className="field-error">{errors.email}</p>}
           </div>
           <div className="sm:col-span-2">
-            <label className="label" htmlFor="shippingAddress">Shipping Address</label>
-            <textarea
-              id="shippingAddress"
-              name="shippingAddress"
-              rows={3}
-              required
-              className="input resize-none"
-              placeholder="House/flat #, street, block, area, city (e.g. Lahore)"
+            <label className="label" htmlFor="phone">Phone Number</label>
+            <input id="phone" name="phone" className={`input ${errors.phone ? "input-error" : ""}`} placeholder="+92 300 1234567" />
+            {errors.phone && <p className="field-error">{errors.phone}</p>}
+          </div>
+        </div>
+
+        <p className="mt-8 text-xs font-semibold uppercase tracking-wide text-muted">Shipping Address</p>
+        <div className="mt-4 grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="label" htmlFor="addressLine1">House / Building &amp; Street</label>
+            <input
+              id="addressLine1" name="addressLine1" className={`input ${errors.addressLine1 ? "input-error" : ""}`}
+              placeholder="House 12-C, Street 4"
             />
+            {errors.addressLine1 && <p className="field-error">{errors.addressLine1}</p>}
+          </div>
+          <div className="sm:col-span-2">
+            <label className="label" htmlFor="addressLine2">Area / Block / Landmark (optional)</label>
+            <input id="addressLine2" name="addressLine2" className="input" placeholder="Block C, Gulberg III" />
+          </div>
+          <div>
+            <label className="label" htmlFor="city">City</label>
+            <input
+              id="city" name="city" className={`input ${errors.city ? "input-error" : ""}`}
+              placeholder="Lahore" defaultValue="Lahore"
+            />
+            {errors.city && <p className="field-error">{errors.city}</p>}
+          </div>
+          <div>
+            <label className="label" htmlFor="postalCode">Postal Code</label>
+            <input
+              id="postalCode" name="postalCode" className={`input ${errors.postalCode ? "input-error" : ""}`}
+              placeholder="54000"
+            />
+            {errors.postalCode && <p className="field-error">{errors.postalCode}</p>}
+          </div>
+          <div className="sm:col-span-2">
+            <label className="label" htmlFor="country">Country</label>
+            <select
+              id="country" name="country" className="input"
+              value={country} onChange={(e) => setCountry(e.target.value)}
+            >
+              <option value="Pakistan">Pakistan</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
         </div>
 
@@ -131,7 +200,7 @@ export default function CheckoutForm() {
 
       <div className="card h-fit p-6">
         <h3 className="font-semibold text-ink">Order Summary</h3>
-        <ul className="mt-4 divide-y divide-black/5">
+        <ul className="mt-4 divide-y divide-line">
           {items.map((item) => (
             <li key={item.productId} className="flex gap-3 py-3">
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-sand">
@@ -147,7 +216,7 @@ export default function CheckoutForm() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 space-y-2 border-t border-black/5 pt-4 text-sm">
+        <div className="mt-4 space-y-2 border-t border-line pt-4 text-sm">
           <div className="flex justify-between text-muted">
             <span>Subtotal</span>
             <span>{formatPKR(subtotal)}</span>
@@ -156,7 +225,7 @@ export default function CheckoutForm() {
             <span>Taxes &amp; Service Fees</span>
             <span>{formatPKR(tax)}</span>
           </div>
-          <div className="flex justify-between border-t border-black/5 pt-3 text-base font-bold text-ink">
+          <div className="flex justify-between border-t border-line pt-3 text-base font-bold text-ink">
             <span>Total</span>
             <span>{formatPKR(total)}</span>
           </div>

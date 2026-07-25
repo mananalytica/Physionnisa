@@ -3,7 +3,7 @@ import { SITE } from "@/lib/siteConfig";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-black/5 bg-sand">
+    <footer className="border-t border-line bg-sand">
       <div className="container-page grid gap-10 py-16 md:grid-cols-3">
         <div>
           <p className="text-xl font-bold text-brand-500">Physionnisa</p>
@@ -51,7 +51,7 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-black/5 py-6 text-center text-xs text-muted">
+      <div className="border-t border-line py-6 text-center text-xs text-muted">
         © {new Date().getFullYear()} {SITE.legalName}. All rights reserved.
       </div>
     </footer>

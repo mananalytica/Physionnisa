@@ -5,10 +5,12 @@ import { track } from "@/lib/dataLayer";
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("submitting");
+    setErrorDetail(null);
     const form = new FormData(e.currentTarget);
     const payload = {
       fullName: String(form.get("fullName") || ""),
@@ -24,9 +26,11 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("failed");
-      const { stored } = await res.json();
-      if (!stored) {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || data.error || "Request failed");
+      }
+      if (!data.stored) {
         console.warn(
           "Message was accepted but NOT written to MotherDuck — check /api/health for config diagnostics."
         );
@@ -34,7 +38,9 @@ export default function ContactForm() {
       track("contact_form_submit", { subject: payload.subject });
       setStatus("done");
       e.currentTarget.reset();
-    } catch {
+    } catch (err) {
+      console.error("Contact form submission failed:", err);
+      setErrorDetail(err instanceof Error ? err.message : "Unknown error");
       setStatus("error");
     }
   }
@@ -81,7 +87,9 @@ export default function ContactForm() {
         </div>
       </div>
       {status === "error" && (
-        <p className="mt-4 text-sm text-red-600">Something went wrong. Please try again.</p>
+        <p className="mt-4 text-sm text-red-600">
+          Something went wrong{errorDetail ? `: ${errorDetail}` : "."} Please try again.
+        </p>
       )}
       <button type="submit" disabled={status === "submitting"} className="btn-primary mt-6 w-full sm:w-auto">
         {status === "submitting" ? "Sending…" : "➤ Send Message"}

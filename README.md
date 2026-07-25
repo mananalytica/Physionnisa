@@ -237,14 +237,38 @@ on `orders`, and `user_id` on `specialists`.
 
 ## 11. Booking form
 
-The booking form (`/booking`) now also collects **phone**, **address**, an optional
+The booking form (`/booking`) collects contact details, a full structured **home
+address** (house/building + street, area/block, city, postal code, country), an optional
 **preferred specialist** (populated live from `/api/specialists`), and **how they heard
 about the clinic**. It auto-fills name/email/phone if the person is logged in. A
 "Recommended for Your Visit" panel next to the form updates based on the selected service
 type (initial consultation vs. follow-up vs. extended treatment) alongside general
 first-visit tips (arrive early, comfortable clothing, bring CNIC/scan reports).
 
-## 12. Localization — Lahore, Pakistan
+The checkout page (`/checkout`) collects the same standard structured shipping address
+fields (not just a single free-text box) plus contact details.
+
+**Address/phone validation:** `lib/addressValidator.ts` checks *format*, not real-world
+existence — required fields, a Pakistani-mobile-number pattern, and a 5-digit Pakistani
+postal code pattern (loosened automatically if "Other" is selected as the country). This
+is intentionally not a geocoding/address-verification service — true address validation
+(confirming the address actually exists and is deliverable) would need a paid API like
+Google's Address Validation API, which requires its own key and billing account. The
+validator is structured so wiring that in later only touches `validateAddress()`.
+
+## 12. Theme
+
+Per your direction, the visual system now follows Upwork's conventions rather than the
+original warm-cream/teal look: a white/light-gray background (`cream`/`sand` in
+`tailwind.config.ts` are literally white and near-white now, kept as names for backward
+compatibility), a punchier green (`brand-500: #0e8a3c`), near-black text (`ink`), thin
+1px-bordered cards instead of heavy shadows, and rectangular (not pill) buttons — pill
+shapes are reserved for badges/tags, matching Upwork's own pattern. All of this lives in
+`tailwind.config.ts` (color tokens) and `app/globals.css` (`.btn`, `.card`, `.input`
+component classes), so it cascades to every page automatically. If you want to adjust
+further, those two files are the only places to touch.
+
+## 13. Localization — Lahore, Pakistan
 
 Business details (address, phone, WhatsApp, hours) live in one place: `lib/siteConfig.ts`.
 Edit that file to update the clinic's real details everywhere at once (footer, contact
@@ -256,7 +280,7 @@ URLs. For a real medical practice, replace `photo_url` (specialists, via the adm
 and product `image_url` fields with real, licensed photography — a stock photo
 represented as a named doctor is misleading once real patients are involved.
 
-## 13. Project structure
+## 14. Project structure
 
 ```
 app/
@@ -306,7 +330,7 @@ schema.sql                      MotherDuck table definitions + seed data
 products-sample.csv             Sample file for the bulk-upload feature
 ```
 
-## 14. Notes
+## 15. Notes
 
 - Colors, type, and layout follow the supplied Google Stitch mockups
   (teal `#12695a` primary, cream background, rounded cards) rather than a

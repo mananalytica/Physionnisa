@@ -12,7 +12,7 @@ export default function TestimonialCard({
   return (
     <div
       className={`flex h-full flex-col rounded-2xl p-6 ${
-        highlighted ? "bg-brand-500 text-white" : "border border-black/5 bg-white"
+        highlighted ? "bg-brand-500 text-white" : "border border-line bg-white"
       }`}
     >
       <div className={`mb-3 flex gap-0.5 ${highlighted ? "text-white" : "text-brand-500"}`}>

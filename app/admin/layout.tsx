@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-sand">
-      <div className="border-b border-black/5 bg-white">
+      <div className="border-b border-line bg-white">
         <div className="container-page flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/admin" className="text-lg font-bold text-brand-500">

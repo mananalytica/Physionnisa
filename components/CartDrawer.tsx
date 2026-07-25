@@ -27,7 +27,7 @@ export default function CartDrawer() {
         }`}
         aria-hidden={!isOpen}
       >
-        <div className="flex items-center justify-between border-b border-black/5 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-line px-6 py-5">
           <h2 className="text-lg font-semibold text-ink">Your Cart</h2>
           <button
             aria-label="Close cart"
@@ -48,7 +48,7 @@ export default function CartDrawer() {
         ) : (
           <>
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              <ul className="divide-y divide-black/5">
+              <ul className="divide-y divide-line">
                 {items.map((item) => (
                   <li key={item.productId} className="flex gap-4 py-4">
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">
@@ -60,7 +60,7 @@ export default function CartDrawer() {
                       <p className="text-sm font-medium text-ink">{item.name}</p>
                       <p className="text-sm text-muted">{formatPKR(item.price)}</p>
                       <div className="mt-auto flex items-center justify-between">
-                        <div className="flex items-center gap-2 rounded-full border border-black/10 px-2 py-1">
+                        <div className="flex items-center gap-2 rounded-full border border-line px-2 py-1">
                           <button
                             className="px-1 text-sm"
                             onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -90,7 +90,7 @@ export default function CartDrawer() {
               </ul>
             </div>
 
-            <div className="border-t border-black/5 px-6 py-5">
+            <div className="border-t border-line px-6 py-5">
               <div className="mb-4 flex items-center justify-between text-base font-semibold text-ink">
                 <span>Subtotal</span>
                 <span>{formatPKR(subtotal)}</span>

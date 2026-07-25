@@ -100,7 +100,12 @@ CREATE TABLE IF NOT EXISTS bookings (
     full_name      VARCHAR NOT NULL,
     email          VARCHAR NOT NULL,
     phone          VARCHAR,
-    address        VARCHAR,
+    address        VARCHAR,                      -- concatenated one-line summary of the fields below
+    address_line1  VARCHAR,                      -- house/building + street
+    address_line2  VARCHAR,                      -- area/block/landmark
+    city           VARCHAR,
+    postal_code    VARCHAR,
+    country        VARCHAR,
     service_type   VARCHAR NOT NULL,
     service_price_pkr DECIMAL(10, 2),
     preferred_date DATE,
@@ -112,23 +117,33 @@ CREATE TABLE IF NOT EXISTS bookings (
 );
 
 CREATE TABLE IF NOT EXISTS orders (
-    id                VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
-    booking_id        VARCHAR,                      -- optional link to a booking checked out together
-    user_id           VARCHAR,                      -- set when the customer was logged in at checkout
-    full_name         VARCHAR,
-    email             VARCHAR,
-    phone             VARCHAR,
-    shipping_address  VARCHAR,
-    subtotal_pkr      DECIMAL(10, 2) NOT NULL,
-    tax_pkr           DECIMAL(10, 2) NOT NULL,
-    total_pkr         DECIMAL(10, 2) NOT NULL,
-    status            VARCHAR DEFAULT 'paid',
-    created_at        TIMESTAMP DEFAULT current_timestamp
+    id                     VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
+    booking_id             VARCHAR,                      -- optional link to a booking checked out together
+    user_id                VARCHAR,                      -- set when the customer was logged in at checkout
+    full_name              VARCHAR,
+    email                  VARCHAR,
+    phone                  VARCHAR,
+    shipping_address       VARCHAR,                      -- concatenated one-line summary of the fields below
+    shipping_address_line1 VARCHAR,                      -- house/building + street
+    shipping_address_line2 VARCHAR,                      -- area/block/landmark
+    shipping_city          VARCHAR,
+    shipping_postal_code   VARCHAR,
+    shipping_country       VARCHAR,
+    subtotal_pkr           DECIMAL(10, 2) NOT NULL,
+    tax_pkr                DECIMAL(10, 2) NOT NULL,
+    total_pkr              DECIMAL(10, 2) NOT NULL,
+    status                 VARCHAR DEFAULT 'paid',
+    created_at             TIMESTAMP DEFAULT current_timestamp
 );
 
 -- If you already ran an earlier version of this schema, add the new columns with:
 --   ALTER TABLE orders ADD COLUMN IF NOT EXISTS phone VARCHAR;
 --   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address_line1 VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address_line2 VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_city VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_postal_code VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_country VARCHAR;
 
 CREATE TABLE IF NOT EXISTS order_items (
     id             VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
@@ -187,6 +202,11 @@ CREATE TABLE IF NOT EXISTS treatment_notes (
 --   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS specialist_id VARCHAR;
 --   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS phone VARCHAR;
 --   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address_line1 VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address_line2 VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS city VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS postal_code VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS country VARCHAR;
 --   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS referral_source VARCHAR;
 --   ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id VARCHAR;
 -- (users and treatment_notes are brand new tables — CREATE TABLE IF NOT EXISTS

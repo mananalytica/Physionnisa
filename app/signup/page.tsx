@@ -50,7 +50,7 @@ export default function SignupPage() {
             type="button"
             onClick={() => setRole("patient")}
             className={`rounded-xl border p-3 text-sm font-medium ${
-              role === "patient" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-black/10 text-ink/70"
+              role === "patient" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line text-ink/70"
             }`}
           >
             I&apos;m a Patient
@@ -59,7 +59,7 @@ export default function SignupPage() {
             type="button"
             onClick={() => setRole("specialist")}
             className={`rounded-xl border p-3 text-sm font-medium ${
-              role === "specialist" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-black/10 text-ink/70"
+              role === "specialist" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-line text-ink/70"
             }`}
           >
             I&apos;m a Specialist

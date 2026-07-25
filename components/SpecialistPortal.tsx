@@ -113,7 +113,7 @@ function BookingRow({
           <select
             value={booking.status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium"
+            className="rounded-full border border-line px-3 py-1.5 text-xs font-medium"
           >
             <option value="requested">Requested</option>
             <option value="confirmed">Confirmed</option>
@@ -166,7 +166,7 @@ function NotesPanel({ bookingId }: { bookingId: string }) {
   }
 
   return (
-    <div className="mt-4 border-t border-black/5 pt-4">
+    <div className="mt-4 border-t border-line pt-4">
       {loadingNotes ? (
         <p className="text-xs text-muted">Loading notes…</p>
       ) : (

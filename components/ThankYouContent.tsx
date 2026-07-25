@@ -84,7 +84,7 @@ export default function ThankYouContent() {
         <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="card p-6 md:p-8">
             {hasBooking && (
-              <div className="mb-6 border-b border-black/5 pb-6">
+              <div className="mb-6 border-b border-line pb-6">
                 <h2 className="flex items-center gap-2 text-lg font-semibold text-ink">📅 Appointment</h2>
                 {bookingData?.booking ? (
                   <div className="mt-3 text-sm text-muted">
@@ -108,7 +108,7 @@ export default function ThankYouContent() {
                     {orderData.items.map((item) => (
                       <div
                         key={item.product_id}
-                        className="flex items-center justify-between border-b border-black/5 py-4"
+                        className="flex items-center justify-between border-b border-line py-4"
                       >
                         <div>
                           <p className="text-sm font-medium text-ink">{item.product_name}</p>
@@ -128,7 +128,7 @@ export default function ThankYouContent() {
                         <span>Taxes &amp; Service Fees</span>
                         <span>{formatPKR(orderData.order.tax_pkr)}</span>
                       </div>
-                      <div className="flex justify-between border-t border-black/5 pt-3 text-base font-bold text-ink">
+                      <div className="flex justify-between border-t border-line pt-3 text-base font-bold text-ink">
                         <span>Total Amount Paid</span>
                         <span>{formatPKR(orderData.order.total_pkr)}</span>
                       </div>

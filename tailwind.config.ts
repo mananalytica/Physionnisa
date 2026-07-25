@@ -10,21 +10,22 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: "#eef6f3",
-          100: "#d9ebe4",
-          200: "#b3d6c8",
-          300: "#82b9a5",
-          400: "#4f9781",
-          500: "#12695a", // primary teal — buttons, links, headings
-          600: "#0e5549",
-          700: "#0b433a",
-          800: "#08322c",
-          900: "#06231f",
+          50: "#e9f7ec",
+          100: "#cdedd4",
+          200: "#98d9a8",
+          300: "#5fc178",
+          400: "#2fa651",
+          500: "#0e8a3c", // primary — buttons, links, active states (Upwork-style vivid green)
+          600: "#0b6f30",
+          700: "#095826",
+          800: "#07421c",
+          900: "#053015",
         },
-        cream: "#f6f5f1",
-        sand: "#eef0ec",
-        ink: "#16211e",
-        muted: "#5c6b66",
+        cream: "#ffffff",   // page background — Upwork runs on white, not warm cream
+        sand: "#f7f8f7",    // alternating section background — cool neutral, not warm
+        ink: "#14171f",     // near-black text, Upwork's signature high-contrast body copy
+        muted: "#5e6b7a",   // cool gray secondary text
+        line: "#e4e6e8",    // hairline border color used on cards/inputs
       },
       fontFamily: {
         sans: [
@@ -39,8 +40,8 @@ const config: Config = {
         xl2: "1.25rem",
       },
       boxShadow: {
-        card: "0 1px 2px rgba(22,33,30,0.04), 0 8px 24px -8px rgba(22,33,30,0.08)",
-        soft: "0 2px 20px rgba(22,33,30,0.06)",
+        card: "0 1px 2px rgba(20,23,31,0.04)",
+        soft: "0 4px 16px -4px rgba(20,23,31,0.10)",
       },
       maxWidth: {
         content: "1200px",

@@ -20,8 +20,8 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/5 bg-cream/90 backdrop-blur">
-      <div className="container-page flex h-20 items-center justify-between">
+    <header className="sticky top-0 z-40 border-b border-line bg-white">
+      <div className="container-page flex h-[72px] items-center justify-between">
         <Link
           href="/"
           className="text-2xl font-bold tracking-tight text-brand-500"
@@ -86,7 +86,7 @@ export default function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-black/5 bg-cream md:hidden">
+        <div className="border-t border-line bg-cream md:hidden">
           <nav className="container-page flex flex-col gap-4 py-5">
             {NAV.map((item) => (
               <Link

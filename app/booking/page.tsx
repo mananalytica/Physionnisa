@@ -74,48 +74,51 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1fr]">
-        <div>
-          <h2 className="text-2xl font-bold text-ink">Service Rates</h2>
-          <p className="mt-2 text-sm text-muted">
-            We believe in transparent clinical pricing without hidden fees.
-          </p>
-          <div className="mt-6 space-y-3">
-            {SERVICE_RATES.map((s, i) => (
-              <div
-                key={s.id}
-                className={`card flex items-center justify-between p-5 ${
-                  i === 0 ? "border-l-4 border-brand-500" : ""
-                }`}
-              >
-                <div>
-                  <p className="font-semibold text-ink">{s.name}</p>
-                  <p className="text-sm text-muted">
-                    {s.duration} · {s.detail}
-                  </p>
-                </div>
-                <p className="font-semibold text-brand-600">{formatPKR(s.price_pkr)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 flex items-start gap-2 rounded-xl bg-sand p-4 text-sm text-muted">
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold text-ink">Service Rates</h2>
+        <p className="mt-2 text-sm text-muted">
+          We believe in transparent clinical pricing without hidden fees.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {SERVICE_RATES.map((s, i) => (
+            <div
+              key={s.id}
+              className={`card p-5 ${i === 0 ? "border-l-4 border-l-brand-500" : ""}`}
+            >
+              <p className="font-semibold text-ink">{s.name}</p>
+              <p className="mt-1 text-sm text-muted">{s.duration} · {s.detail}</p>
+              <p className="mt-3 text-lg font-bold text-brand-600">{formatPKR(s.price_pkr)}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-[1fr_260px]">
+          <div className="flex items-start gap-2 rounded-xl bg-sand p-4 text-sm text-muted">
             <span>ⓘ</span>
             <span>
               Health insurance claims can be processed on-site. Please bring
               your insurance card to your session.
             </span>
           </div>
-          <div className="relative mt-6 aspect-[16/10] overflow-hidden rounded-2xl">
+          <div className="relative hidden aspect-[4/3] overflow-hidden rounded-xl sm:block">
             <Image
-              src="https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=900&q=80"
+              src="https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=600&q=80"
               alt="Physionnisa treatment room"
               fill
               className="object-cover"
             />
           </div>
         </div>
+      </div>
 
-        <BookingForm />
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold text-ink">Secure Your Session</h2>
+        <p className="mt-2 text-sm text-muted">
+          Fill in your details below and our clinical coordinators will confirm your slot.
+        </p>
+        <div className="mt-6">
+          <BookingForm />
+        </div>
       </div>
     </div>
   );

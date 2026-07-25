@@ -177,7 +177,7 @@ export default function AdminSpecialistsPage() {
         {loading ? (
           <p className="text-sm text-muted">Loading…</p>
         ) : (
-          <ul className="divide-y divide-black/5">
+          <ul className="divide-y divide-line">
             {specialists.map((s) => (
               <li key={s.id} className="flex items-center justify-between py-3 text-sm">
                 <div>

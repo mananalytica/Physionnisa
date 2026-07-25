@@ -70,8 +70,8 @@ export default function ProductBuyBox({ product }: { product: Product }) {
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3 text-xs text-muted">
-        <div className="rounded-xl border border-black/10 px-4 py-3">🚚 Free Delivery in Pakistan</div>
-        <div className="rounded-xl border border-black/10 px-4 py-3">🛡 1 Year Medical Warranty</div>
+        <div className="rounded-xl border border-line px-4 py-3">🚚 Free Delivery in Pakistan</div>
+        <div className="rounded-xl border border-line px-4 py-3">🛡 1 Year Medical Warranty</div>
       </div>
     </div>
   );
