@@ -31,6 +31,8 @@ export async function GET() {
       const condition = p.condition_gs || "new";
       const currency = p.currency || "PKR";
       const hasIdentifier = Boolean(p.gtin || p.mpn) && p.identifier_exists !== false;
+      const price = Number(p.price_pkr) || 0;
+      const comparePrice = p.compare_at_pkr != null ? Number(p.compare_at_pkr) : null;
 
       return `  <item>
     <g:id>${escapeXml(p.id)}</g:id>
@@ -39,10 +41,10 @@ export async function GET() {
     <link>${escapeXml(link)}</link>
     ${p.image_url ? `<g:image_link>${escapeXml(p.image_url)}</g:image_link>` : ""}
     <g:availability>${escapeXml(availability)}</g:availability>
-    <g:price>${p.price_pkr.toFixed(2)} ${escapeXml(currency)}</g:price>
+    <g:price>${price.toFixed(2)} ${escapeXml(currency)}</g:price>
     ${
-      p.compare_at_pkr && p.compare_at_pkr > p.price_pkr
-        ? `<g:sale_price>${p.price_pkr.toFixed(2)} ${escapeXml(currency)}</g:sale_price>`
+      comparePrice && comparePrice > price
+        ? `<g:sale_price>${price.toFixed(2)} ${escapeXml(currency)}</g:sale_price>`
         : ""
     }
     <g:brand>${escapeXml(p.brand || "Physionnisa")}</g:brand>

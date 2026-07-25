@@ -1,5 +1,25 @@
-import { Pool, type QueryResultRow } from "pg";
+import { Pool, types, type QueryResultRow } from "pg";
 import { attachDatabasePool } from "@vercel/functions";
+
+/**
+ * By default, node-postgres returns:
+ *   - NUMERIC/DECIMAL columns (price_pkr, subtotal_pkr, rating, etc.) as
+ *     STRINGS, to avoid silent precision loss — but this codebase treats
+ *     them as numbers everywhere (.toFixed(), arithmetic, JSON-LD, the
+ *     Google Shopping feed).
+ *   - DATE/TIMESTAMP columns as JS Date OBJECTS — but this codebase treats
+ *     them as plain strings everywhere (rendered directly in JSX, compared
+ *     with string dates like `b.preferred_date >= today`).
+ * Overriding the type parsers here, once, keeps every query result shaped
+ * the way the rest of the app already assumes, instead of patching dozens
+ * of call sites (or worse, silently rendering "[object Date]" / NaN
+ * comparisons in production).
+ * OIDs: https://github.com/brianc/node-pg-types/blob/master/lib/builtins.js
+ */
+types.setTypeParser(types.builtins.NUMERIC, (val: string) => (val === null ? null : parseFloat(val)));
+types.setTypeParser(types.builtins.DATE, (val: string) => val); // keep raw 'YYYY-MM-DD'
+types.setTypeParser(types.builtins.TIMESTAMP, (val: string) => val); // keep raw string
+types.setTypeParser(types.builtins.TIMESTAMPTZ, (val: string) => val); // keep raw string
 
 /**
  * MotherDuck connection.
