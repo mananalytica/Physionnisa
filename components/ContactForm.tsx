@@ -9,9 +9,10 @@ export default function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formEl = e.currentTarget; // capture now — e.currentTarget becomes null after the first await
     setStatus("submitting");
     setErrorDetail(null);
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(formEl);
     const payload = {
       fullName: String(form.get("fullName") || ""),
       email: String(form.get("email") || ""),
@@ -37,7 +38,7 @@ export default function ContactForm() {
       }
       track("contact_form_submit", { subject: payload.subject });
       setStatus("done");
-      e.currentTarget.reset();
+      formEl.reset();
     } catch (err) {
       console.error("Contact form submission failed:", err);
       setErrorDetail(err instanceof Error ? err.message : "Unknown error");
