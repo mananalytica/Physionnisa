@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE } from "@/lib/siteConfig";
 
 export default function Footer() {
   return (
@@ -7,8 +8,7 @@ export default function Footer() {
         <div>
           <p className="text-xl font-bold text-brand-500">Physionnisa</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
-            Expert physiotherapy tailored for women&apos;s health and empowerment.
-            Experience clinical excellence in a warm, premium environment.
+            {SITE.tagline} Experience clinical excellence in a warm, premium environment in {SITE.city}.
           </p>
         </div>
         <div>
@@ -39,15 +39,20 @@ export default function Footer() {
         <div>
           <p className="text-sm font-semibold text-ink">Hours &amp; Contact</p>
           <ul className="mt-3 space-y-2 text-sm text-muted">
-            <li>Clinic Hours: Mon–Fri 8am–8pm</li>
-            <li>Saturday: 9am–2pm (By Appointment)</li>
-            <li>+1 (555) PHY-SION</li>
-            <li>care@physionnisa.com</li>
+            <li>{SITE.clinic.hoursWeekday}</li>
+            <li>{SITE.clinic.hoursWeekend}</li>
+            <li>{SITE.clinic.addressLine1}, {SITE.clinic.area}, {SITE.city}</li>
+            <li>
+              <a href={SITE.clinic.phoneHref} className="hover:text-brand-600">
+                {SITE.clinic.phoneDisplay}
+              </a>
+            </li>
+            <li>{SITE.clinic.email}</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-black/5 py-6 text-center text-xs text-muted">
-        © {new Date().getFullYear()} Physionnisa Physiotherapy. All rights reserved.
+        © {new Date().getFullYear()} {SITE.legalName}. All rights reserved.
       </div>
     </footer>
   );

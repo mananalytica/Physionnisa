@@ -62,8 +62,8 @@ export default function Header() {
             )}
           </button>
           <Link
-            href="/contact"
-            aria-label="Account and contact"
+            href="/account"
+            aria-label="Account, login, or sign up"
             className="hidden h-10 w-10 items-center justify-center rounded-full text-ink/70 transition hover:bg-black/5 sm:flex"
           >
             <UserIcon />
@@ -100,6 +100,9 @@ export default function Header() {
             ))}
             <Link href="/booking" className="btn-primary w-full" onClick={() => setMobileOpen(false)}>
               Book Now
+            </Link>
+            <Link href="/account" className="text-base font-medium text-ink/80" onClick={() => setMobileOpen(false)}>
+              My Account
             </Link>
           </nav>
         </div>

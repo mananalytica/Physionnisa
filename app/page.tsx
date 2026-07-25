@@ -167,18 +167,18 @@ export default function HomePage() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <TestimonialCard
               quote="Recovered faster than I ever thought possible. The pelvic health specialists here are world-class and so compassionate."
-              name="Sarah Jenkins"
+              name="Sana Malik"
               role="Post-Natal Recovery Patient"
             />
             <TestimonialCard
               quote="Finally, a clinic that actually listens to women. My running injury was diagnosed accurately after years of generic advice elsewhere."
-              name="Elena Rodriguez"
+              name="Hira Ahmed"
               role="Marathon Runner"
               highlighted
             />
             <TestimonialCard
               quote="The atmosphere is so professional yet warm. I felt completely safe and understood during my entire treatment plan."
-              name="Linda Thompson"
+              name="Mahnoor Baig"
               role="Chronic Pain Management"
             />
           </div>

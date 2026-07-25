@@ -2,26 +2,26 @@ import type { BlogPost, Product, Specialist } from "./types";
 
 export const FALLBACK_SPECIALISTS: Specialist[] = [
   {
-    id: "sp_elena",
-    slug: "elena-rodriguez",
-    name: "Dr. Elena Rodriguez",
+    id: "sp_ayesha",
+    slug: "ayesha-raza",
+    name: "Dr. Ayesha Raza",
     title: "Senior Physiotherapist & Pelvic Health Specialist",
     photo_url:
       "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800&q=80",
-    photo_alt: "Dr. Elena Rodriguez, board-certified physiotherapist, standing in a Physionnisa clinic room",
-    bio: "With over 15 years of clinical expertise, Dr. Elena Rodriguez has pioneered a holistic approach to pelvic health that integrates orthopedic physical therapy with specialized internal health strategies. Her mission at Physionnisa is to dismantle the stigma surrounding pelvic floor dysfunction and provide women with the tools they need for lifelong physical confidence.",
-    years_experience: 15,
-    languages: "English, Spanish, Catalan",
-    credentials: "DPT, MSc",
+    photo_alt: "Dr. Ayesha Raza, board-certified physiotherapist, in a Physionnisa clinic room in Lahore",
+    bio: "With over 12 years of clinical practice between Lahore and abroad, Dr. Ayesha Raza has built a holistic approach to pelvic health that integrates orthopedic physical therapy with specialized internal health strategies. Her mission at Physionnisa is to make pelvic floor and post-natal care openly discussed and accessible for women across Pakistan.",
+    years_experience: 12,
+    languages: "Urdu, English, Punjabi",
+    credentials: "DPT, MSPT",
     license_number: null,
-    license_authority: "American Board of Physical Therapy Specialties",
+    license_authority: "Pakistan Physical Therapy Association (PPTA)",
     education:
-      "Doctor of Physical Therapy (DPT), Stanford University School of Medicine, 2005–2008; MSc in Pelvic Floor Rehabilitation, University of Brighton, UK, 2010–2012",
+      "Doctor of Physical Therapy (DPT), University of Lahore, 2010–2014; MS in Pelvic Floor Rehabilitation, Riphah International University, Islamabad, 2015–2017",
     specializations: "Pelvic Health, Post-Natal Recovery, Sports Injury Rehab",
     memberships:
-      "International Continence Society (ICS), Section on Women's Health (APTA), Global Physiotherapy Alliance",
+      "Pakistan Physical Therapy Association (PPTA), International Continence Society (ICS), Section on Women's Health (APTA)",
     external_profile_url: null,
-    clinic: "Physionnisa Central Clinic",
+    clinic: "Physionnisa Central Clinic, Gulberg III, Lahore",
   },
 ];
 
@@ -209,7 +209,7 @@ export const FALLBACK_BLOG_POSTS: BlogPost[] = [
     body: "Full article body goes here.",
     cover_image:
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&q=80",
-    author: "Dr. Elena Rodriguez",
+    author: "Dr. Ayesha Raza",
     published_at: "2024-05-20",
   },
   {

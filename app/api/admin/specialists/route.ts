@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 const COLUMNS = `
   id, slug, name, title, photo_url, photo_alt, bio, years_experience,
   languages, credentials, license_number, license_authority, education,
-  specializations, memberships, external_profile_url, clinic, created_at
+  specializations, memberships, external_profile_url, clinic, user_id, created_at
 `;
 
 export async function GET() {
@@ -36,12 +36,20 @@ export async function POST(req: NextRequest) {
     const existing = await query<{ id: string }>(`SELECT id FROM specialists WHERE slug = $1 LIMIT 1`, [s.slug]);
     const id = existing[0]?.id || computedId;
 
+    let linkedUserId: string | null = null;
+    if (s.linked_email) {
+      const users = await query<{ id: string }>(`SELECT id FROM users WHERE email = $1 LIMIT 1`, [
+        String(s.linked_email).toLowerCase().trim(),
+      ]);
+      linkedUserId = users[0]?.id ?? null;
+    }
+
     await query(
       `INSERT INTO specialists (
          id, slug, name, title, photo_url, photo_alt, bio, years_experience, languages,
          credentials, license_number, license_authority, education, specializations,
-         memberships, external_profile_url, clinic
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         memberships, external_profile_url, clinic, user_id
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (id) DO UPDATE SET
          slug = EXCLUDED.slug, name = EXCLUDED.name, title = EXCLUDED.title,
          photo_url = EXCLUDED.photo_url, photo_alt = EXCLUDED.photo_alt, bio = EXCLUDED.bio,
@@ -49,7 +57,8 @@ export async function POST(req: NextRequest) {
          credentials = EXCLUDED.credentials, license_number = EXCLUDED.license_number,
          license_authority = EXCLUDED.license_authority, education = EXCLUDED.education,
          specializations = EXCLUDED.specializations, memberships = EXCLUDED.memberships,
-         external_profile_url = EXCLUDED.external_profile_url, clinic = EXCLUDED.clinic`,
+         external_profile_url = EXCLUDED.external_profile_url, clinic = EXCLUDED.clinic,
+         user_id = COALESCE(EXCLUDED.user_id, specialists.user_id)`,
       [
         id,
         s.slug,
@@ -68,10 +77,16 @@ export async function POST(req: NextRequest) {
         s.memberships ?? null,
         s.external_profile_url ?? null,
         s.clinic ?? "Physionnisa Central Clinic",
+        linkedUserId,
       ]
     );
 
-    return NextResponse.json({ id }, { status: 201 });
+    // Keep the linked user's role/specialist_id in sync so their portal picks up the assignment.
+    if (linkedUserId) {
+      await query(`UPDATE users SET role = 'specialist', specialist_id = $1 WHERE id = $2`, [id, linkedUserId]);
+    }
+
+    return NextResponse.json({ id, linked: Boolean(linkedUserId) }, { status: 201 });
   } catch (err) {
     console.error("POST /api/admin/specialists failed:", err);
     return NextResponse.json({ error: "Could not save specialist" }, { status: 500 });

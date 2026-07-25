@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDbConfigured, query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/currentUser";
 
 export const runtime = "nodejs";
 
@@ -33,10 +34,12 @@ export async function POST(req: NextRequest) {
     let stored = false;
 
     if (isDbConfigured()) {
+      const currentUser = await getCurrentUser(req).catch(() => null);
+
       await query(
-        `INSERT INTO orders (id, booking_id, full_name, email, phone, shipping_address, subtotal_pkr, tax_pkr, total_pkr)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [orderId, bookingId ?? null, fullName ?? null, email ?? null, phone ?? null, shippingAddress ?? null, subtotal, tax, total]
+        `INSERT INTO orders (id, booking_id, user_id, full_name, email, phone, shipping_address, subtotal_pkr, tax_pkr, total_pkr)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [orderId, bookingId ?? null, currentUser?.id ?? null, fullName ?? null, email ?? null, phone ?? null, shippingAddress ?? null, subtotal, tax, total]
       );
 
       for (const item of items) {

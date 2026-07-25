@@ -206,12 +206,62 @@ environment, then visit `/admin/login`. Auth is a signed, stateless session cook
 - `middleware.ts` protects everything under `/admin/*` and `/api/admin/*` except the
   login page/endpoint.
 
-## 10. Project structure
+## 10. Accounts, login, and the patient/specialist portal
+
+The header's account icon now leads to `/account` (login/signup) instead of the contact
+page. Two account types share one `users` table:
+
+- **Patients** sign up at `/signup` and land on `/account`, showing:
+  - Upcoming and past appointments (matched by their account, plus a fallback match on
+    email so guest bookings made before signing up still show up).
+  - Care notes and plans their specialist has written for them.
+  - Order history.
+  - A "Book a New Visit" shortcut into `/booking`, pre-filled with their name/email/phone.
+- **Specialists** sign up choosing "I'm a Specialist" at `/signup`, but see nothing until
+  an admin links their account: in `/admin/specialists`, edit their profile and fill in
+  **Linked Account Email** with the email they signed up with. Once linked, their
+  `/account` shows:
+  - Their assigned appointments (matched via the booking's optional specialist selection).
+  - A status dropdown per appointment (requested/confirmed/completed/cancelled).
+  - A notes/plan editor per appointment — visible to the patient in their own portal.
+
+Auth is a signed, stateless session cookie (`AUTH_SESSION_SECRET`, 30-day expiry,
+httpOnly) — separate from the admin panel's session. Passwords are hashed with Node's
+built-in `scrypt` (no extra dependency). Set `AUTH_SESSION_SECRET` in your environment
+(see `.env.example`) before using signup/login — accounts also require MotherDuck to be
+connected, same as the admin panel.
+
+Relevant tables added to `schema.sql`: `users`, `treatment_notes`, plus `user_id` /
+`specialist_id` / `address` / `phone` / `referral_source` columns on `bookings`, `user_id`
+on `orders`, and `user_id` on `specialists`.
+
+## 11. Booking form
+
+The booking form (`/booking`) now also collects **phone**, **address**, an optional
+**preferred specialist** (populated live from `/api/specialists`), and **how they heard
+about the clinic**. It auto-fills name/email/phone if the person is logged in. A
+"Recommended for Your Visit" panel next to the form updates based on the selected service
+type (initial consultation vs. follow-up vs. extended treatment) alongside general
+first-visit tips (arrive early, comfortable clothing, bring CNIC/scan reports).
+
+## 12. Localization — Lahore, Pakistan
+
+Business details (address, phone, WhatsApp, hours) live in one place: `lib/siteConfig.ts`.
+Edit that file to update the clinic's real details everywhere at once (footer, contact
+page, thank-you page) instead of hunting through components. The seed specialist profile,
+testimonials, and currency (`Rs` / PKR) are localized to Lahore as a starting point.
+
+**Placeholder images note:** product/specialist photos still use generic Unsplash stock
+URLs. For a real medical practice, replace `photo_url` (specialists, via the admin panel)
+and product `image_url` fields with real, licensed photography — a stock photo
+represented as a named doctor is misleading once real patients are involved.
+
+## 13. Project structure
 
 ```
 app/
   page.tsx                       Home
-  booking/page.tsx                Booking (appointments only)
+  booking/page.tsx                Booking (appointments + address + recommendations)
   checkout/page.tsx               Checkout (cart purchase only)
   checkout/thank-you/page.tsx     Order/booking confirmation (fetches by id)
   shop/page.tsx                    Shop (product grid)
@@ -221,23 +271,34 @@ app/
   blog/page.tsx                     Blog listing
   blog/[slug]/page.tsx              Blog post
   contact/page.tsx                  Contact
+  login/page.tsx                    Patient/specialist login
+  signup/page.tsx                   Patient/specialist signup
+  account/page.tsx                  Portal (renders Patient or Specialist view)
   admin/                             Password-protected admin panel
     login/page.tsx
     page.tsx                         Dashboard (DB health)
     products/page.tsx                Product CRUD + CSV bulk upload
-    specialists/page.tsx             Specialist CRUD
+    specialists/page.tsx             Specialist CRUD + portal account linking
   api/                               MotherDuck-backed API routes
     health/route.ts                  Connection diagnostics
     feed/google-shopping/route.ts    Merchant Center XML feed
+    auth/                            signup, login, logout, me
+    patient/                         bookings, orders, notes (own history)
+    specialist/                      bookings, notes (assigned patients)
     admin/                           Protected by middleware.ts
 components/                     Shared UI + client-side forms
+  PatientPortal.tsx / SpecialistPortal.tsx   Account portal views
 context/CartContext.tsx         Global cart state
 lib/
   db.ts                          MotherDuck connection (pg)
   queries.ts                     Public data access layer (DB + fallback)
   data.ts                        Seed/fallback content
+  siteConfig.ts                  Clinic address/phone/hours — single source of truth
   dataLayer.ts                   Custom analytics tracking
   adminAuth.ts                   Signed admin session tokens
+  userAuth.ts                    Signed patient/specialist session tokens
+  password.ts                    scrypt password hashing
+  currentUser.ts                 Resolves logged-in user from session cookie
   csv.ts                         CSV parser for bulk upload
   types.ts                       Shared TS types
 middleware.ts                   Protects /admin and /api/admin
@@ -245,7 +306,7 @@ schema.sql                      MotherDuck table definitions + seed data
 products-sample.csv             Sample file for the bulk-upload feature
 ```
 
-## 11. Notes
+## 14. Notes
 
 - Colors, type, and layout follow the supplied Google Stitch mockups
   (teal `#12695a` primary, cream background, rounded cards) rather than a

@@ -16,17 +16,36 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   try {
     const body = await req.json();
     const updates = UPDATABLE_FIELDS.filter((f) => f in body);
-    if (updates.length === 0) {
+    if (updates.length === 0 && !body.linked_email) {
       return NextResponse.json({ error: "No updatable fields provided" }, { status: 400 });
     }
 
-    const setClause = updates.map((f, i) => `${f} = $${i + 1}`).join(", ");
-    const values = updates.map((f) => body[f]);
+    if (updates.length > 0) {
+      const setClause = updates.map((f, i) => `${f} = $${i + 1}`).join(", ");
+      const values = updates.map((f) => body[f]);
+      await query(`UPDATE specialists SET ${setClause} WHERE id = $${updates.length + 1}`, [
+        ...values,
+        params.id,
+      ]);
+    }
 
-    await query(`UPDATE specialists SET ${setClause} WHERE id = $${updates.length + 1}`, [
-      ...values,
-      params.id,
-    ]);
+    if (body.linked_email) {
+      const users = await query<{ id: string }>(`SELECT id FROM users WHERE email = $1 LIMIT 1`, [
+        String(body.linked_email).toLowerCase().trim(),
+      ]);
+      const linkedUserId = users[0]?.id;
+      if (linkedUserId) {
+        await query(`UPDATE specialists SET user_id = $1 WHERE id = $2`, [linkedUserId, params.id]);
+        await query(`UPDATE users SET role = 'specialist', specialist_id = $1 WHERE id = $2`, [
+          params.id,
+          linkedUserId,
+        ]);
+      } else {
+        return NextResponse.json(
+          { ok: true, warning: "No account found with that email yet — they can sign up, then you can re-link." },
+        );
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

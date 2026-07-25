@@ -1,4 +1,5 @@
 import ContactForm from "@/components/ContactForm";
+import { SITE } from "@/lib/siteConfig";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Contact — Physionnisa" };
@@ -7,17 +8,17 @@ const FAQS = [
   {
     icon: "P",
     q: "Where can I park?",
-    a: 'Validated patient parking is available in the Medical District Garage adjacent to our building. Follow the signs for "Suite 400 Patient Parking."',
+    a: `Complimentary patient parking is available in front of our ${SITE.clinic.area} clinic. On busy market days, valet parking is offered at the main gate.`,
   },
   {
     icon: "💳",
     q: "Do you accept insurance?",
-    a: "Yes, we accept most major private insurance providers. We also offer simplified direct billing options for out-of-network claims.",
+    a: "Yes, we accept most major Pakistani health insurance and TPA panels, including corporate health cards. We also offer direct billing for out-of-network claims.",
   },
   {
     icon: "📋",
     q: "What should I bring first visit?",
-    a: "Please bring your ID, insurance card, and wear comfortable, loose-fitting clothing that allows easy access to the area being treated.",
+    a: "Please bring your CNIC, insurance/health card (if applicable), and wear comfortable, loose-fitting clothing that allows easy access to the area being treated.",
   },
   {
     icon: "🕐",
@@ -33,8 +34,8 @@ export default function ContactPage() {
         <h1 className="text-4xl font-bold text-ink">Get in Touch</h1>
         <p className="mt-3 text-[15px] text-muted">
           We&apos;re here to support your journey to physical wellness and
-          empowerment. Reach out to our clinical team for appointments or
-          general inquiries.
+          empowerment. Reach out to our clinical team in {SITE.city} for
+          appointments or general inquiries.
         </p>
       </div>
 
@@ -47,21 +48,43 @@ export default function ContactPage() {
             <span className="text-brand-500">📍</span>
             <div>
               <p className="font-semibold text-ink">Main Clinic</p>
-              <p className="text-sm text-muted">120 Wellness Way, Suite 400<br />Central Medical District</p>
+              <p className="text-sm text-muted">
+                {SITE.clinic.addressLine1}<br />{SITE.clinic.addressLine2}
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.clinic.mapsQuery)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-block text-xs font-semibold text-brand-600"
+              >
+                Get directions ↗
+              </a>
             </div>
           </div>
           <div className="card flex items-start gap-3 p-5">
             <span className="text-brand-500">🕐</span>
             <div>
               <p className="font-semibold text-ink">Clinic Hours</p>
-              <p className="text-sm text-muted">Mon–Fri: 8am – 8pm<br />Sat–Sun: Closed</p>
+              <p className="text-sm text-muted">
+                {SITE.clinic.hoursWeekday}<br />{SITE.clinic.hoursWeekend}
+              </p>
             </div>
           </div>
           <div className="card flex items-start gap-3 p-5">
             <span className="text-brand-500">☎</span>
             <div>
               <p className="font-semibold text-ink">Direct Contact</p>
-              <p className="text-sm text-muted">(555) 012-3456<br />care@physionnisa.com</p>
+              <p className="text-sm text-muted">
+                {SITE.clinic.phoneDisplay}<br />{SITE.clinic.email}
+              </p>
+              <a
+                href={SITE.clinic.whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-block text-xs font-semibold text-brand-600"
+              >
+                WhatsApp us ↗
+              </a>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { SITE } from "@/lib/siteConfig";
 
 function formatPKR(v: number) {
   return `Rs ${Number(v).toLocaleString("en-PK")}`;
@@ -150,17 +151,24 @@ export default function ThankYouContent() {
                 you haven&apos;t done so online.
               </p>
               <p className="mt-4 text-sm text-white/85">
-                📍 120 Wellness Way, Suite 400<br />Central Medical District
+                📍 {SITE.clinic.addressLine1}<br />{SITE.clinic.addressLine2}
               </p>
-              <button className="btn-outline-light mt-4 w-full">Add to Calendar</button>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.clinic.mapsQuery)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-outline-light mt-4 block w-full text-center"
+              >
+                Get Directions
+              </a>
             </div>
             <div className="card p-5 text-sm">
               <p className="font-semibold text-ink">Questions?</p>
               <p className="mt-2 text-muted">
                 Our clinical coordinators are available to assist you.
               </p>
-              <p className="mt-3 text-muted">☎ (555) 012-3456</p>
-              <p className="text-muted">✉ care@physionnisa.com</p>
+              <p className="mt-3 text-muted">☎ {SITE.clinic.phoneDisplay}</p>
+              <p className="text-muted">✉ {SITE.clinic.email}</p>
             </div>
           </div>
         </div>

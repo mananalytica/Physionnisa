@@ -7,7 +7,7 @@ const EMPTY_FORM = {
   slug: "", name: "", title: "", photo_url: "", photo_alt: "", bio: "",
   years_experience: "", languages: "", credentials: "", license_number: "",
   license_authority: "", education: "", specializations: "", memberships: "",
-  external_profile_url: "", clinic: "Physionnisa Central Clinic",
+  external_profile_url: "", clinic: "Physionnisa Central Clinic", linked_email: "",
 };
 
 export default function AdminSpecialistsPage() {
@@ -47,7 +47,7 @@ export default function AdminSpecialistsPage() {
       license_number: s.license_number || "", license_authority: s.license_authority || "",
       education: s.education || "", specializations: s.specializations || "",
       memberships: s.memberships || "", external_profile_url: s.external_profile_url || "",
-      clinic: s.clinic || "Physionnisa Central Clinic",
+      clinic: s.clinic || "Physionnisa Central Clinic", linked_email: "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -133,6 +133,22 @@ export default function AdminSpecialistsPage() {
           <Field label="Specializations (comma-separated)" value={form.specializations} onChange={(v) => setForm({ ...form, specializations: v })} className="lg:col-span-2" />
           <Field label="External Verification URL" value={form.external_profile_url} onChange={(v) => setForm({ ...form, external_profile_url: v })} />
         </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted">
+          Portal Access
+        </p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Linked Account Email (optional)"
+            value={form.linked_email}
+            onChange={(v) => setForm({ ...form, linked_email: v })}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted">
+          If this specialist has signed up for an account (as a &quot;Specialist&quot; at /signup),
+          enter their email here to link it — their assigned appointments will then show up in
+          their portal at /account. Leave blank to skip for now.
+        </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">Education (separate entries with ;)</label>
@@ -165,7 +181,14 @@ export default function AdminSpecialistsPage() {
             {specialists.map((s) => (
               <li key={s.id} className="flex items-center justify-between py-3 text-sm">
                 <div>
-                  <p className="font-medium text-ink">{s.name}</p>
+                  <p className="font-medium text-ink">
+                    {s.name}
+                    {s.user_id && (
+                      <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+                        Portal Linked
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-muted">{s.title} · /{s.slug}</p>
                 </div>
                 <div>

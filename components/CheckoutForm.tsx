@@ -104,7 +104,7 @@ export default function CheckoutForm() {
           </div>
           <div>
             <label className="label" htmlFor="phone">Phone Number</label>
-            <input id="phone" name="phone" required className="input" placeholder="(555) 012-3456" />
+            <input id="phone" name="phone" required className="input" placeholder="+92 300 1234567" />
           </div>
           <div className="sm:col-span-2">
             <label className="label" htmlFor="shippingAddress">Shipping Address</label>
@@ -114,7 +114,7 @@ export default function CheckoutForm() {
               rows={3}
               required
               className="input resize-none"
-              placeholder="Street address, city, postal code"
+              placeholder="House/flat #, street, block, area, city (e.g. Lahore)"
             />
           </div>
         </div>

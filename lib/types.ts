@@ -45,6 +45,7 @@ export type Specialist = {
   specializations?: string | null;
   memberships?: string | null;
   external_profile_url?: string | null;
+  user_id?: string | null;
 };
 
 export type BlogPost = {

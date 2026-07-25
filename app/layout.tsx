@@ -12,9 +12,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Physionnisa — Expert Physiotherapy for Women",
+  title: "Physionnisa — Expert Physiotherapy for Women in Lahore",
   description:
-    "Clinical excellence for women's health. Pelvic health, post-natal recovery, and sports injury rehab, delivered with empathetic, evidence-based care.",
+    "Clinical excellence for women's health in Lahore, Pakistan. Pelvic health, post-natal recovery, and sports injury rehab, delivered with empathetic, evidence-based care.",
 };
 
 export default function RootLayout({

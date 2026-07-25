@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS specialists (
     name          VARCHAR NOT NULL,
     title         VARCHAR NOT NULL,
     photo_url     VARCHAR,
-    photo_alt     VARCHAR,        -- descriptive alt text, e.g. "Dr. Elena Rodriguez, physiotherapist, in clinic"
+    photo_alt     VARCHAR,        -- descriptive alt text, e.g. "Dr. Ayesha Raza, physiotherapist, in clinic"
     bio           VARCHAR,
     years_experience INTEGER,
     languages     VARCHAR,        -- comma-separated
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS specialists (
     external_profile_url VARCHAR,  -- link to an independent verification (e.g. licensing board lookup)
 
     clinic        VARCHAR,
+    user_id       VARCHAR,       -- links this profile to a users row (role = specialist) for portal login
     created_at    TIMESTAMP DEFAULT current_timestamp
 );
 
@@ -94,12 +95,17 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 
 CREATE TABLE IF NOT EXISTS bookings (
     id             VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
+    user_id        VARCHAR,                      -- set when the patient was logged in at booking time
+    specialist_id  VARCHAR,                      -- optional: which specialist this appointment is with
     full_name      VARCHAR NOT NULL,
     email          VARCHAR NOT NULL,
+    phone          VARCHAR,
+    address        VARCHAR,
     service_type   VARCHAR NOT NULL,
     service_price_pkr DECIMAL(10, 2),
     preferred_date DATE,
     reason         VARCHAR,
+    referral_source VARCHAR,                     -- how they heard about the clinic
     status         VARCHAR DEFAULT 'requested',  -- requested | confirmed | cancelled | completed
     source         VARCHAR DEFAULT 'website',
     created_at     TIMESTAMP DEFAULT current_timestamp
@@ -108,6 +114,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 CREATE TABLE IF NOT EXISTS orders (
     id                VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
     booking_id        VARCHAR,                      -- optional link to a booking checked out together
+    user_id           VARCHAR,                      -- set when the customer was logged in at checkout
     full_name         VARCHAR,
     email             VARCHAR,
     phone             VARCHAR,
@@ -148,17 +155,42 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
     created_at     TIMESTAMP DEFAULT current_timestamp
 );
 
--- Optional: a raw event log if you'd rather warehouse dataLayer events in
--- MotherDuck instead of (or in addition to) a dedicated analytics tool.
--- The /api/events route below writes here.
-CREATE TABLE IF NOT EXISTS analytics_events (
-    id             VARCHAR PRIMARY KEY,
-    event          VARCHAR NOT NULL,
-    payload        JSON,
-    page_path      VARCHAR,
-    session_id     VARCHAR,
-    created_at     TIMESTAMP DEFAULT current_timestamp
+-- Note: an optional `analytics_events` table (for warehousing dataLayer
+-- events) was intentionally left out of this schema — /api/events degrades
+-- gracefully if that table doesn't exist. Add it back yourself if you want
+-- to warehouse events in MotherDuck; see lib/dataLayer.ts's trackAndPersist().
+
+CREATE TABLE IF NOT EXISTS users (
+    id              VARCHAR PRIMARY KEY,          -- generated app-side (uuid)
+    email           VARCHAR UNIQUE NOT NULL,
+    password_hash   VARCHAR NOT NULL,              -- scrypt(salt:hash), see lib/password.ts
+    full_name       VARCHAR NOT NULL,
+    phone           VARCHAR,
+    role            VARCHAR NOT NULL DEFAULT 'patient',  -- patient | specialist
+    specialist_id   VARCHAR,                       -- set once linked to a specialists row (role = specialist)
+    created_at      TIMESTAMP DEFAULT current_timestamp
 );
+
+CREATE TABLE IF NOT EXISTS treatment_notes (
+    id                  VARCHAR PRIMARY KEY,       -- generated app-side (uuid)
+    booking_id          VARCHAR,                   -- the appointment this note relates to
+    patient_user_id     VARCHAR,
+    specialist_user_id  VARCHAR,
+    note                VARCHAR,                   -- clinical note (visible to both patient & specialist)
+    plan                VARCHAR,                   -- plan for next steps / future sessions
+    created_at          TIMESTAMP DEFAULT current_timestamp
+);
+
+-- If you already ran an earlier version of this schema, add the new columns with:
+--   ALTER TABLE specialists ADD COLUMN IF NOT EXISTS user_id VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS user_id VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS specialist_id VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS phone VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address VARCHAR;
+--   ALTER TABLE bookings ADD COLUMN IF NOT EXISTS referral_source VARCHAR;
+--   ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id VARCHAR;
+-- (users and treatment_notes are brand new tables — CREATE TABLE IF NOT EXISTS
+--  above already handles them, just re-run this whole file.)
 
 -- Seed data -------------------------------------------------------------
 
@@ -166,16 +198,16 @@ INSERT INTO specialists (
   id, slug, name, title, photo_url, photo_alt, bio, years_experience, languages,
   credentials, license_authority, education, specializations, memberships, clinic
 )
-VALUES ('sp_elena', 'elena-rodriguez', 'Dr. Elena Rodriguez', 'Senior Physiotherapist & Pelvic Health Specialist',
+VALUES ('sp_ayesha', 'ayesha-raza', 'Dr. Ayesha Raza', 'Senior Physiotherapist & Pelvic Health Specialist',
   'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800',
-  'Dr. Elena Rodriguez, board-certified physiotherapist, standing in a Physionnisa clinic room',
-  'Dr. Elena Rodriguez has pioneered a holistic approach to pelvic health that integrates orthopedic physical therapy with specialized internal health strategies.',
-  15, 'English, Spanish, Catalan',
-  'DPT, MSc', 'American Board of Physical Therapy Specialties',
-  'Doctor of Physical Therapy (DPT), Stanford University School of Medicine, 2005–2008; MSc in Pelvic Floor Rehabilitation, University of Brighton, UK, 2010–2012',
+  'Dr. Ayesha Raza, board-certified physiotherapist, in a Physionnisa clinic room in Lahore',
+  'With over 12 years of clinical practice between Lahore and abroad, Dr. Ayesha Raza has built a holistic approach to pelvic health that integrates orthopedic physical therapy with specialized internal health strategies. Her mission at Physionnisa is to make pelvic floor and post-natal care openly discussed and accessible for women across Pakistan.',
+  12, 'Urdu, English, Punjabi',
+  'DPT, MSPT', 'Pakistan Physical Therapy Association (PPTA)',
+  'Doctor of Physical Therapy (DPT), University of Lahore, 2010–2014; MS in Pelvic Floor Rehabilitation, Riphah International University, Islamabad, 2015–2017',
   'Pelvic Health, Post-Natal Recovery, Sports Injury Rehab',
-  'International Continence Society (ICS), Section on Women''s Health (APTA), Global Physiotherapy Alliance',
-  'Physionnisa Central Clinic')
+  'Pakistan Physical Therapy Association (PPTA), International Continence Society (ICS), Section on Women''s Health (APTA)',
+  'Physionnisa Central Clinic, Gulberg III, Lahore')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO products (
@@ -210,7 +242,7 @@ VALUES
  ('bp_pelvic_awareness', 'pelvic-health-awareness', 'Pelvic Health Awareness', 'Women''s Health',
   'Breaking the silence on pelvic floor dysfunction. Understand the symptoms, the science of recovery, and how specialized physiotherapy can restore quality of life and confidence.',
   'Full article body goes here.',
-  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200', 'Dr. Elena Rodriguez', DATE '2024-05-20'),
+  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200', 'Dr. Ayesha Raza', DATE '2024-05-20'),
  ('bp_pregnancy_exercise', 'safe-exercise-during-pregnancy', 'Safe Exercise During Pregnancy', 'Pregnancy',
   'Motion is medicine, especially during pregnancy. Learn how to adapt your routine safely through each trimester to support your body''s changes and prepare for a healthy delivery.',
   'Full article body goes here.',

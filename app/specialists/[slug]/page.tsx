@@ -21,6 +21,7 @@ const EXPERTISE_ICONS = ["♀", "🤰", "🏃‍♀️", "💪", "🧘‍♀️"
 export default async function SpecialistPage({ params }: { params: { slug: string } }) {
   const specialist = await getSpecialistBySlug(params.slug);
   if (!specialist) notFound();
+  const firstName = specialist.name.split(" ")[1] ?? specialist.name;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://physionnisa.com";
   const jsonLd = {
@@ -84,7 +85,7 @@ export default async function SpecialistPage({ params }: { params: { slug: strin
             <h2 className="text-2xl font-bold text-ink">Clinical Approach &amp; Philosophy</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted">{specialist.bio}</p>
             <p className="mt-4 text-[15px] leading-relaxed text-muted">
-              {specialist.name.split(" ")[1] ?? specialist.name} believes that rehabilitation is a
+              {firstName} believes that rehabilitation is a
               collaborative journey — combining manual therapy, targeted therapeutic exercise, and
               advanced biofeedback technology to create personalized recovery blueprints that respect
               each patient&apos;s unique lifestyle and goals.
@@ -165,19 +166,19 @@ export default async function SpecialistPage({ params }: { params: { slug: strin
           <h2 className="text-2xl font-bold text-ink">Patient Experiences</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             <TestimonialCard
-              quote="Dr. Elena completely changed my perspective on recovery after my second pregnancy. Her technical knowledge is immense, but it's her empathy that truly makes the difference."
-              name="Sarah J."
+              quote={`Dr. ${firstName} completely changed my perspective on recovery after my second pregnancy. Her technical knowledge is immense, but it's her empathy that truly makes the difference.`}
+              name="Sana M."
               role="Post-natal Patient"
             />
             <TestimonialCard
               quote="The clinical precision of the treatment plan for my pelvic pain was life-changing. I felt heard and respected at every step of the way."
-              name="Maya R."
+              name="Mahnoor R."
               role="Chronic Pain Patient"
             />
             <TestimonialCard
-              quote="Expert care for athletes that understands specific physiology. Elena's return-to-sport program was rigorous but exactly what I needed."
-              name="Jessica T."
-              role="Professional Triathlete"
+              quote={`Expert care for athletes that understands specific physiology. ${firstName}'s return-to-sport program was rigorous but exactly what I needed.`}
+              name="Javeria T."
+              role="Professional Athlete"
             />
           </div>
         </div>
@@ -191,7 +192,7 @@ export default async function SpecialistPage({ params }: { params: { slug: strin
             </h2>
             <p className="mt-3 text-sm text-white/85">
               {specialist.name} is currently accepting new patients at our
-              Central London and Digital clinics.
+              {specialist.clinic ? ` ${specialist.clinic}` : " Gulberg III, Lahore"} clinic and via video consultation.
             </p>
             <div className="mt-6 flex gap-8 text-sm">
               <div>
