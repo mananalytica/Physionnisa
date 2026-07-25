@@ -12,6 +12,17 @@ export type Product = {
   review_count: number;
   badge: string | null;
   in_stock?: boolean;
+
+  // Google Shopping / Merchant Center feed attributes
+  brand?: string | null;
+  gtin?: string | null;
+  mpn?: string | null;
+  condition_gs?: "new" | "refurbished" | "used" | null;
+  availability_gs?: "in stock" | "out of stock" | "preorder" | "backorder" | null;
+  google_product_category?: string | null;
+  product_type?: string | null;
+  identifier_exists?: boolean | null;
+  currency?: string | null;
 };
 
 export type Specialist = {
@@ -20,10 +31,20 @@ export type Specialist = {
   name: string;
   title: string;
   photo_url: string | null;
+  photo_alt?: string | null;
   bio: string | null;
   years_experience: number | null;
   languages: string | null;
   clinic: string | null;
+
+  // E-E-A-T / trust signals
+  credentials?: string | null;
+  license_number?: string | null;
+  license_authority?: string | null;
+  education?: string | null;
+  specializations?: string | null;
+  memberships?: string | null;
+  external_profile_url?: string | null;
 };
 
 export type BlogPost = {

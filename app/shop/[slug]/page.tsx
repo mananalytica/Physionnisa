@@ -20,8 +20,45 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://physionnisa.com";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.long_desc || product.short_desc || product.name,
+    image: product.image_url ? [product.image_url] : undefined,
+    sku: product.id,
+    mpn: product.mpn || undefined,
+    gtin: product.gtin || undefined,
+    brand: { "@type": "Brand", name: product.brand || "Physionnisa" },
+    aggregateRating: product.review_count
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: product.rating,
+          reviewCount: product.review_count,
+        }
+      : undefined,
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/shop/${product.slug}`,
+      priceCurrency: product.currency || "PKR",
+      price: product.price_pkr,
+      itemCondition: `https://schema.org/${
+        (product.condition_gs || "new") === "new" ? "NewCondition" : "UsedCondition"
+      }`,
+      availability: `https://schema.org/${
+        (product.availability_gs || "in stock") === "in stock" ? "InStock" : "OutOfStock"
+      }`,
+    },
+  };
+
   return (
     <div className="container-page py-10">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <nav className="mb-8 text-sm text-muted">
         <Link href="/shop" className="hover:text-brand-600">
           Shop

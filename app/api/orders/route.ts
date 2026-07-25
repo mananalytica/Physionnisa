@@ -13,7 +13,7 @@ type IncomingItem = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { bookingId, items, subtotal, tax, total, fullName, email } = body as {
+    const { bookingId, items, subtotal, tax, total, fullName, email, phone, shippingAddress } = body as {
       bookingId?: string;
       items: IncomingItem[];
       subtotal: number;
@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
       total: number;
       fullName?: string;
       email?: string;
+      phone?: string;
+      shippingAddress?: string;
     };
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -28,12 +30,13 @@ export async function POST(req: NextRequest) {
     }
 
     const orderId = crypto.randomUUID();
+    let stored = false;
 
     if (isDbConfigured()) {
       await query(
-        `INSERT INTO orders (id, booking_id, full_name, email, subtotal_pkr, tax_pkr, total_pkr)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [orderId, bookingId ?? null, fullName ?? null, email ?? null, subtotal, tax, total]
+        `INSERT INTO orders (id, booking_id, full_name, email, phone, shipping_address, subtotal_pkr, tax_pkr, total_pkr)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [orderId, bookingId ?? null, fullName ?? null, email ?? null, phone ?? null, shippingAddress ?? null, subtotal, tax, total]
       );
 
       for (const item of items) {
@@ -43,11 +46,16 @@ export async function POST(req: NextRequest) {
           [crypto.randomUUID(), orderId, item.productId, item.name, item.price, item.quantity]
         );
       }
+      stored = true;
     } else {
-      console.warn("MOTHERDUCK_TOKEN not set — order logged locally only:", { orderId, items, total });
+      console.warn("MOTHERDUCK_TOKEN/MOTHERDUCK_DATABASE not set — order NOT stored, logged locally only:", {
+        orderId,
+        items,
+        total,
+      });
     }
 
-    return NextResponse.json({ orderId }, { status: 201 });
+    return NextResponse.json({ orderId, stored }, { status: 201 });
   } catch (err) {
     console.error("POST /api/orders failed:", err);
     return NextResponse.json({ error: "Could not create order" }, { status: 500 });

@@ -28,12 +28,24 @@ function buildConnectionString() {
   const token = process.env.MOTHERDUCK_TOKEN;
   const host = process.env.MOTHERDUCK_PG_HOST || "pg.us-east-1-aws.motherduck.com";
   const port = process.env.MOTHERDUCK_PG_PORT || "5432";
-  const database = process.env.MOTHERDUCK_DATABASE || "md:";
+  const database = process.env.MOTHERDUCK_DATABASE;
 
   if (!token) {
     throw new Error(
       "MOTHERDUCK_TOKEN is not set. Add it to your environment (see .env.example) " +
         "or install the MotherDuck integration from the Vercel Marketplace."
+    );
+  }
+  if (!database) {
+    // Deliberately not defaulting to "md:" here — connecting to the wrong
+    // database silently (tables not found) is exactly the kind of bug that
+    // looks like "nothing is being saved" without ever throwing a visible
+    // error. Fail loudly instead so it shows up in Vercel function logs
+    // and the /api/health response immediately.
+    throw new Error(
+      "MOTHERDUCK_DATABASE is not set. Set it to the exact database name you ran " +
+        "schema.sql against (e.g. \"physionnisa\"). The Vercel MotherDuck " +
+        "integration only sets MOTHERDUCK_TOKEN automatically — this one you add yourself."
     );
   }
 
@@ -73,5 +85,17 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
 
 /** True when MotherDuck env vars are present — lets pages fall back to seed data in local/demo mode. */
 export function isDbConfigured(): boolean {
-  return Boolean(process.env.MOTHERDUCK_TOKEN);
+  return Boolean(process.env.MOTHERDUCK_TOKEN && process.env.MOTHERDUCK_DATABASE);
+}
+
+/** Human-readable config diagnostics — used by /api/health and the admin dashboard. */
+export function getDbConfigStatus() {
+  return {
+    hasToken: Boolean(process.env.MOTHERDUCK_TOKEN),
+    hasDatabase: Boolean(process.env.MOTHERDUCK_DATABASE),
+    database: process.env.MOTHERDUCK_DATABASE || null,
+    host: process.env.MOTHERDUCK_PG_HOST || "pg.us-east-1-aws.motherduck.com (default)",
+    port: process.env.MOTHERDUCK_PG_PORT || "5432 (default)",
+    configured: isDbConfigured(),
+  };
 }

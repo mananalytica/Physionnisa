@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    let stored = false;
     if (isDbConfigured()) {
       await query(
         `INSERT INTO newsletter_subscribers (id, email)
@@ -17,11 +18,12 @@ export async function POST(req: NextRequest) {
          ON CONFLICT (email) DO NOTHING`,
         [crypto.randomUUID(), email]
       );
+      stored = true;
     } else {
-      console.warn("MOTHERDUCK_TOKEN not set — subscriber logged locally only:", email);
+      console.warn("MOTHERDUCK_TOKEN/MOTHERDUCK_DATABASE not set — subscriber NOT stored, logged locally only:", email);
     }
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    return NextResponse.json({ ok: true, stored }, { status: 201 });
   } catch (err) {
     console.error("POST /api/newsletter failed:", err);
     return NextResponse.json({ error: "Could not subscribe" }, { status: 500 });

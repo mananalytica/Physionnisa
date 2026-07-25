@@ -25,6 +25,12 @@ export default function ContactForm() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("failed");
+      const { stored } = await res.json();
+      if (!stored) {
+        console.warn(
+          "Message was accepted but NOT written to MotherDuck — check /api/health for config diagnostics."
+        );
+      }
       track("contact_form_submit", { subject: payload.subject });
       setStatus("done");
       e.currentTarget.reset();

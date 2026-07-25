@@ -16,18 +16,47 @@ export async function generateMetadata({
   return { title: specialist ? `${specialist.name} — Physionnisa` : "Specialist — Physionnisa" };
 }
 
-const EXPERTISE = [
-  { icon: "♀", title: "Pelvic Health", copy: "Treatment for incontinence, pelvic organ prolapse, and chronic pelvic pain through muscle re-education and functional integration." },
-  { icon: "🤰", title: "Post-Natal Recovery", copy: "Comprehensive assessments and progressive rehabilitation programs for Diastasis Recti and post-delivery core restoration." },
-  { icon: "🏃‍♀️", title: "Sports Injury Rehab", copy: "Specialized protocols for female athletes, focusing on hip mechanics, ACL prevention, and return-to-sport safely after injury." },
-];
+const EXPERTISE_ICONS = ["♀", "🤰", "🏃‍♀️", "💪", "🧘‍♀️", "🦴"];
 
 export default async function SpecialistPage({ params }: { params: { slug: string } }) {
   const specialist = await getSpecialistBySlug(params.slug);
   if (!specialist) notFound();
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://physionnisa.com";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: specialist.name,
+    jobTitle: specialist.title,
+    description: specialist.bio || undefined,
+    image: specialist.photo_url || undefined,
+    url: `${siteUrl}/specialists/${specialist.slug}`,
+    worksFor: { "@type": "MedicalOrganization", name: specialist.clinic || "Physionnisa" },
+    hasCredential: specialist.credentials
+      ? specialist.credentials.split(",").map((c) => ({
+          "@type": "EducationalOccupationalCredential",
+          credentialCategory: c.trim(),
+        }))
+      : undefined,
+    alumniOf: specialist.education
+      ? specialist.education.split(";").map((e) => ({ "@type": "EducationalOrganization", name: e.trim() }))
+      : undefined,
+    memberOf: specialist.memberships
+      ? specialist.memberships.split(",").map((m) => ({ "@type": "Organization", name: m.trim() }))
+      : undefined,
+    knowsAbout: specialist.specializations
+      ? specialist.specializations.split(",").map((s) => s.trim())
+      : undefined,
+    sameAs: specialist.external_profile_url ? [specialist.external_profile_url] : undefined,
+  };
+
   return (
     <div>
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="container-page grid gap-10 py-14 md:grid-cols-2 md:items-center">
         <div>
           <span className="eyebrow">Board Certified Specialist</span>
@@ -64,33 +93,72 @@ export default async function SpecialistPage({ params }: { params: { slug: strin
           <div className="card p-6">
             <p className="font-semibold text-ink">Quick Facts</p>
             <ul className="mt-4 space-y-3 text-sm text-muted">
-              <li>📋 {specialist.years_experience}+ Years Experience</li>
-              <li>🌐 {specialist.languages}</li>
-              <li>👥 4,000+ Success Stories</li>
-              <li>📍 {specialist.clinic}</li>
+              {specialist.years_experience && <li>📋 {specialist.years_experience}+ Years Experience</li>}
+              {specialist.languages && <li>🌐 {specialist.languages}</li>}
+              {specialist.credentials && <li>🎓 {specialist.credentials}</li>}
+              {specialist.clinic && <li>📍 {specialist.clinic}</li>}
             </ul>
           </div>
         </div>
       </section>
 
-      <section className="container-page py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink">Specialized Expertise</h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
-          Focused clinical tracks designed to address the unique physiological
-          needs of women across every life stage.
-        </p>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {EXPERTISE.map((e) => (
-            <div key={e.title} className="card p-6 text-left">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-lg text-brand-600">
-                {e.icon}
+      {(specialist.education || specialist.memberships || specialist.license_authority) && (
+        <section className="container-page py-16">
+          <div className="grid gap-6 md:grid-cols-2">
+            {specialist.education && (
+              <div className="card p-6">
+                <p className="font-semibold text-ink">Education &amp; Credentials</p>
+                <ul className="mt-4 space-y-2 text-sm text-muted">
+                  {specialist.education.split(";").map((e) => (
+                    <li key={e} className="border-l-2 border-brand-200 pl-3">
+                      {e.trim()}
+                    </li>
+                  ))}
+                </ul>
+                {specialist.license_authority && (
+                  <p className="mt-4 text-xs text-muted">
+                    Licensed under {specialist.license_authority}
+                    {specialist.license_number ? ` · License #${specialist.license_number}` : ""}
+                  </p>
+                )}
               </div>
-              <p className="mt-4 font-semibold text-ink">{e.title}</p>
-              <p className="mt-2 text-sm text-muted">{e.copy}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            )}
+            {specialist.memberships && (
+              <div className="card p-6">
+                <p className="font-semibold text-ink">Professional Memberships</p>
+                <ul className="mt-4 space-y-2 text-sm text-muted">
+                  {specialist.memberships.split(",").map((m) => (
+                    <li key={m} className="flex items-center gap-2">
+                      <span className="text-brand-500">✓</span>
+                      {m.trim()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {specialist.specializations && (
+        <section className="container-page py-16 text-center">
+          <h2 className="text-2xl font-bold text-ink">Specialized Expertise</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
+            Focused clinical tracks designed to address the unique physiological
+            needs of women across every life stage.
+          </p>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {specialist.specializations.split(",").map((title, i) => (
+              <div key={title} className="card p-6 text-left">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-lg text-brand-600">
+                  {EXPERTISE_ICONS[i % EXPERTISE_ICONS.length]}
+                </div>
+                <p className="mt-4 font-semibold text-ink">{title.trim()}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="bg-sand py-16 text-center">
         <div className="container-page">

@@ -124,32 +124,128 @@ edit one place: `lib/dataLayer.ts`. A few options:
   `analytics_events` table via `/api/events`).
 - **Send to Segment/PostHog/etc.:** add the SDK call inside `track()`.
 
-## 5. Project structure
+## 5. Troubleshooting: "my bookings/contact form aren't saving to MotherDuck"
+
+Visit **`/api/health`** on your deployed site. It will tell you exactly what's wrong:
+
+- `"configured": false` → `MOTHERDUCK_TOKEN` and/or `MOTHERDUCK_DATABASE` aren't set in
+  this environment. **This is the most common cause.** The Vercel MotherDuck
+  marketplace integration only auto-populates `MOTHERDUCK_TOKEN` — you still need to add
+  `MOTHERDUCK_DATABASE` yourself (Project → Settings → Environment Variables), set to the
+  *exact* database name you ran `schema.sql` against. Redeploy after adding it — env var
+  changes don't apply to already-running deployments.
+- `"connection": "error"` → token/database are set but the connection itself failed.
+  Check `MOTHERDUCK_PG_HOST` matches your org's region.
+- `"connection": "ok"` with `rowCounts` → you're fully connected; the counts show how
+  many rows are in each table right now, so you can confirm a test submission landed.
+
+As of this version, `/api/bookings`, `/api/orders`, `/api/contact`, and `/api/newsletter`
+all return a `stored: true/false` field and log a console warning (visible in Vercel's
+function logs) whenever a submission was accepted by the UI but not actually written to
+MotherDuck — so this failure mode is loud instead of silent going forward.
+
+## 6. Checkout vs. Booking — two independent flows
+
+These are intentionally decoupled:
+
+- **Shop → Cart → `/checkout`** — a pure product purchase. Fills in shipping/contact
+  details, creates a row in `orders` (+ `order_items`), and redirects to
+  `/checkout/thank-you?order=<id>`.
+- **`/booking`** — an appointment request only. Creates a row in `bookings` and redirects
+  to `/checkout/thank-you?booking=<id>`.
+- The thank-you page reads whichever of `?order=` / `?booking=` (or both) are present in
+  the URL and fetches the corresponding record fresh from the API — so it renders
+  correctly even on a page refresh, unlike relying on client-side cart state.
+
+## 7. Specialists
+
+`/specialists` lists every specialist profile (linked from the header nav and homepage);
+`/specialists/[slug]` is the individual profile page from the mockups. Both are backed by
+`getSpecialists()` / `getSpecialistBySlug()` in `lib/queries.ts`. Add profiles via the
+admin panel (see below) rather than editing seed data directly once MotherDuck is connected.
+
+## 8. Google Shopping / Merchant Center
+
+Products carry the standard Merchant Center feed attributes (`brand`, `gtin`, `mpn`,
+`condition_gs`, `availability_gs`, `google_product_category`, `product_type`, `currency`).
+
+- **On the website:** every product page renders `schema.org/Product` JSON-LD (price,
+  availability, brand, GTIN/MPN, aggregate rating) so Google can pick products up via
+  structured data as well.
+- **On the backend:** `GET /api/feed/google-shopping` generates a live RSS/XML product
+  feed straight from MotherDuck. Register that URL as a **Scheduled fetch** feed in
+  Merchant Center → Products → Feeds.
+- Specialist pages similarly carry `schema.org/Person` JSON-LD with credentials,
+  education, and memberships — see §9.
+
+## 9. Admin panel (`/admin`)
+
+A password-protected panel for managing products and specialist profiles without writing
+SQL by hand.
+
+**Setup:** set `ADMIN_PASSWORD` (and optionally a separate `ADMIN_SESSION_SECRET`) in your
+environment, then visit `/admin/login`. Auth is a signed, stateless session cookie (HMAC,
+7-day expiry, httpOnly) — no separate user table needed for a single-admin setup.
+
+- **`/admin`** — dashboard showing live MotherDuck connection status and row counts
+  (same data as `/api/health`, presented for humans).
+- **`/admin/products`** — add/edit/delete products one at a time, or bulk-upload via CSV.
+  A sample file matching the expected columns is included at `products-sample.csv` in the
+  repo root. Only `slug`, `name`, `category`, and `price_pkr` are required per row; the
+  Google Shopping columns are optional and default sensibly (`brand: Physionnisa`,
+  `condition_gs: new`, `availability_gs: in stock`). Uploading a slug that already exists
+  updates that product instead of duplicating it.
+- **`/admin/specialists`** — add/edit/delete specialist profiles, including the
+  credential/education/membership fields that feed the structured data on the public
+  profile page. The form includes an inline reminder to keep this content accurate and
+  verifiable, in line with Google's guidance on health-related (YMYL) content and E-E-A-T
+  (Experience, Expertise, Authoritativeness, Trustworthiness) — real license numbers,
+  real institutions, no unverifiable claims.
+- The admin panel requires MotherDuck to be connected (there's no seed-data fallback for
+  writes) — `/api/health` will tell you if it isn't yet.
+- `middleware.ts` protects everything under `/admin/*` and `/api/admin/*` except the
+  login page/endpoint.
+
+## 10. Project structure
 
 ```
 app/
-  page.tsx                    Home
-  booking/page.tsx            Booking
-  shop/page.tsx                Shop (product grid)
-  shop/[slug]/page.tsx         Product detail
-  specialists/[slug]/page.tsx  Specialist profile
-  blog/page.tsx                 Blog listing
-  blog/[slug]/page.tsx          Blog post
-  contact/page.tsx              Contact
-  checkout/thank-you/page.tsx   Order/booking confirmation
-  api/                          MotherDuck-backed API routes
+  page.tsx                       Home
+  booking/page.tsx                Booking (appointments only)
+  checkout/page.tsx               Checkout (cart purchase only)
+  checkout/thank-you/page.tsx     Order/booking confirmation (fetches by id)
+  shop/page.tsx                    Shop (product grid)
+  shop/[slug]/page.tsx             Product detail (+ Product JSON-LD)
+  specialists/page.tsx             Specialists index
+  specialists/[slug]/page.tsx      Specialist profile (+ Person JSON-LD)
+  blog/page.tsx                     Blog listing
+  blog/[slug]/page.tsx              Blog post
+  contact/page.tsx                  Contact
+  admin/                             Password-protected admin panel
+    login/page.tsx
+    page.tsx                         Dashboard (DB health)
+    products/page.tsx                Product CRUD + CSV bulk upload
+    specialists/page.tsx             Specialist CRUD
+  api/                               MotherDuck-backed API routes
+    health/route.ts                  Connection diagnostics
+    feed/google-shopping/route.ts    Merchant Center XML feed
+    admin/                           Protected by middleware.ts
 components/                     Shared UI + client-side forms
 context/CartContext.tsx         Global cart state
 lib/
-  db.ts                         MotherDuck connection (pg)
-  queries.ts                    Data access layer (DB + fallback)
-  data.ts                       Seed/fallback content
-  dataLayer.ts                  Custom analytics tracking
-  types.ts                      Shared TS types
+  db.ts                          MotherDuck connection (pg)
+  queries.ts                     Public data access layer (DB + fallback)
+  data.ts                        Seed/fallback content
+  dataLayer.ts                   Custom analytics tracking
+  adminAuth.ts                   Signed admin session tokens
+  csv.ts                         CSV parser for bulk upload
+  types.ts                       Shared TS types
+middleware.ts                   Protects /admin and /api/admin
 schema.sql                      MotherDuck table definitions + seed data
+products-sample.csv             Sample file for the bulk-upload feature
 ```
 
-## 6. Notes
+## 11. Notes
 
 - Colors, type, and layout follow the supplied Google Stitch mockups
   (teal `#12695a` primary, cream background, rounded cards) rather than a

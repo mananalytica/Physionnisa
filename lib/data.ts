@@ -8,9 +8,19 @@ export const FALLBACK_SPECIALISTS: Specialist[] = [
     title: "Senior Physiotherapist & Pelvic Health Specialist",
     photo_url:
       "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800&q=80",
+    photo_alt: "Dr. Elena Rodriguez, board-certified physiotherapist, standing in a Physionnisa clinic room",
     bio: "With over 15 years of clinical expertise, Dr. Elena Rodriguez has pioneered a holistic approach to pelvic health that integrates orthopedic physical therapy with specialized internal health strategies. Her mission at Physionnisa is to dismantle the stigma surrounding pelvic floor dysfunction and provide women with the tools they need for lifelong physical confidence.",
     years_experience: 15,
     languages: "English, Spanish, Catalan",
+    credentials: "DPT, MSc",
+    license_number: null,
+    license_authority: "American Board of Physical Therapy Specialties",
+    education:
+      "Doctor of Physical Therapy (DPT), Stanford University School of Medicine, 2005–2008; MSc in Pelvic Floor Rehabilitation, University of Brighton, UK, 2010–2012",
+    specializations: "Pelvic Health, Post-Natal Recovery, Sports Injury Rehab",
+    memberships:
+      "International Continence Society (ICS), Section on Women's Health (APTA), Global Physiotherapy Alliance",
+    external_profile_url: null,
     clinic: "Physionnisa Central Clinic",
   },
 ];
@@ -32,6 +42,16 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 128,
     badge: "Physiotherapist Recommended",
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "PFT-PREMIUM-01",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category:
+      "Health & Beauty > Health Care > Fitness & Nutrition > Physical Therapy Equipment",
+    product_type: "Clinical Equipment > Pelvic Health",
+    identifier_exists: true,
+    currency: "PKR",
   },
   {
     id: "pr_resistance_band",
@@ -49,6 +69,15 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 64,
     badge: null,
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "RB-SET-05",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category: "Sporting Goods > Exercise & Fitness > Exercise Bands",
+    product_type: "Recovery Essentials > Bands",
+    identifier_exists: true,
+    currency: "PKR",
   },
   {
     id: "pr_foam_roller",
@@ -66,6 +95,15 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 52,
     badge: null,
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "FR-HD-01",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category: "Sporting Goods > Exercise & Fitness > Massage Tools",
+    product_type: "Recovery Essentials > Massage",
+    identifier_exists: true,
+    currency: "PKR",
   },
   {
     id: "pr_heat_pack",
@@ -83,6 +121,15 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 41,
     badge: null,
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "HP-LAV-01",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category: "Health & Beauty > Health Care > Hot & Cold Therapy",
+    product_type: "Recovery Essentials > Heat Therapy",
+    identifier_exists: true,
+    currency: "PKR",
   },
   {
     id: "pr_tens_unit",
@@ -100,6 +147,15 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 37,
     badge: "Professional",
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "TENS-DC-01",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category: "Health & Beauty > Health Care > Medical Supplies > TENS Units",
+    product_type: "Clinical Equipment > Pain Management",
+    identifier_exists: true,
+    currency: "PKR",
   },
   {
     id: "pr_posture_corrector",
@@ -117,6 +173,15 @@ export const FALLBACK_PRODUCTS: Product[] = [
     review_count: 29,
     badge: null,
     in_stock: true,
+    brand: "Physionnisa",
+    gtin: null,
+    mpn: "PC-PRO-01",
+    condition_gs: "new",
+    availability_gs: "in stock",
+    google_product_category: "Health & Beauty > Health Care > Medical Supplies > Braces & Supports",
+    product_type: "Clinical Equipment > Posture",
+    identifier_exists: true,
+    currency: "PKR",
   },
 ];
 
@@ -185,3 +250,6 @@ export const SERVICE_RATES = [
     price_pkr: 45000,
   },
 ];
+
+/** Checkout tax/service-fee rate — shown on both the checkout page and the thank-you summary. */
+export const CHECKOUT_TAX_RATE = 0.086;

@@ -22,8 +22,8 @@ export default function HomePage() {
             <Link href="/booking" className="btn-primary">
               Start Your Recovery
             </Link>
-            <Link href="/booking" className="btn-secondary">
-              Our Specializations
+            <Link href="/specialists" className="btn-secondary">
+              Meet Our Specialists
             </Link>
           </div>
           <div className="mt-8 flex items-center gap-3 text-sm text-muted">

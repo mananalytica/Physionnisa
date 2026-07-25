@@ -39,7 +39,12 @@ export default function BookingForm() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Request failed");
-      const { bookingId } = await res.json();
+      const { bookingId, stored } = await res.json();
+      if (!stored) {
+        console.warn(
+          "Booking was accepted but NOT written to MotherDuck — check /api/health for config diagnostics."
+        );
+      }
       router.push(`/checkout/thank-you?booking=${bookingId}`);
     } catch (err) {
       console.error(err);

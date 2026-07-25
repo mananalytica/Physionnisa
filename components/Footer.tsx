@@ -15,6 +15,11 @@ export default function Footer() {
           <p className="text-sm font-semibold text-ink">Quick Links</p>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
+              <Link href="/specialists" className="hover:text-brand-600">
+                Our Specialists
+              </Link>
+            </li>
+            <li>
               <Link href="/contact" className="hover:text-brand-600">
                 Contact Us
               </Link>

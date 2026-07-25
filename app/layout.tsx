@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
+import SiteChrome from "@/components/SiteChrome";
 import PageViewTracker from "@/components/PageViewTracker";
 
 const inter = Inter({
@@ -29,10 +27,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col font-sans">
         <CartProvider>
           <PageViewTracker />
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CartDrawer />
+          <SiteChrome>{children}</SiteChrome>
         </CartProvider>
       </body>
     </html>

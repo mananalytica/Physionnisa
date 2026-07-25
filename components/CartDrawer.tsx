@@ -96,14 +96,14 @@ export default function CartDrawer() {
                 <span>{formatPKR(subtotal)}</span>
               </div>
               <Link
-                href="/booking"
+                href="/checkout"
                 className="btn-primary w-full"
                 onClick={() => {
                   track("begin_checkout", { subtotal, item_count: items.length });
                   closeCart();
                 }}
               >
-                Checkout with Booking
+                Proceed to Checkout
               </Link>
               <p className="mt-2 text-center text-xs text-muted">
                 Taxes &amp; service fees calculated at checkout.

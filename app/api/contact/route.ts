@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const id = crypto.randomUUID();
+    let stored = false;
 
     if (isDbConfigured()) {
       await query(
@@ -19,11 +20,12 @@ export async function POST(req: NextRequest) {
          VALUES ($1, $2, $3, $4, $5, $6)`,
         [id, fullName, email, phone ?? null, subject ?? null, message ?? null]
       );
+      stored = true;
     } else {
-      console.warn("MOTHERDUCK_TOKEN not set — message logged locally only:", { id, fullName, email });
+      console.warn("MOTHERDUCK_TOKEN/MOTHERDUCK_DATABASE not set — message NOT stored, logged locally only:", { id, fullName, email });
     }
 
-    return NextResponse.json({ id }, { status: 201 });
+    return NextResponse.json({ id, stored }, { status: 201 });
   } catch (err) {
     console.error("POST /api/contact failed:", err);
     return NextResponse.json({ error: "Could not send message" }, { status: 500 });

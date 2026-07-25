@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     const bookingId = crypto.randomUUID();
+    let stored = false;
 
     if (isDbConfigured()) {
       await query(
@@ -21,8 +22,9 @@ export async function POST(req: NextRequest) {
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [bookingId, fullName, email, serviceType, servicePrice ?? null, preferredDate, reason ?? null]
       );
+      stored = true;
     } else {
-      console.warn("MOTHERDUCK_TOKEN not set — booking logged locally only:", {
+      console.warn("MOTHERDUCK_TOKEN/MOTHERDUCK_DATABASE not set — booking NOT stored, logged locally only:", {
         bookingId,
         fullName,
         email,
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ bookingId }, { status: 201 });
+    return NextResponse.json({ bookingId, stored }, { status: 201 });
   } catch (err) {
     console.error("POST /api/bookings failed:", err);
     return NextResponse.json({ error: "Could not create booking" }, { status: 500 });

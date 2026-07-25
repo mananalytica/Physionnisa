@@ -9,6 +9,7 @@ import { track } from "@/lib/dataLayer";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/booking", label: "Booking" },
+  { href: "/specialists", label: "Specialists" },
   { href: "/shop", label: "Shop" },
   { href: "/blog", label: "Blog" },
 ];
