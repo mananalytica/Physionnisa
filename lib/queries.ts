@@ -2,9 +2,10 @@ import { isDbConfigured, query } from "./db";
 import {
   FALLBACK_BLOG_POSTS,
   FALLBACK_PRODUCTS,
+  FALLBACK_SERVICES,
   FALLBACK_SPECIALISTS,
 } from "./data";
-import type { BlogPost, Product, Specialist } from "./types";
+import type { BlogPost, Product, Service, Specialist } from "./types";
 
 /**
  * Every getter here tries MotherDuck first (when MOTHERDUCK_TOKEN and
@@ -26,6 +27,39 @@ const SPECIALIST_COLUMNS = `
   languages, credentials, license_number, license_authority, education,
   specializations, memberships, external_profile_url, clinic
 `;
+
+const SERVICE_COLUMNS = `
+  id, slug, name, category, short_desc, long_desc, duration_minutes,
+  price_pkr, icon, image_url, benefits, is_featured, display_order
+`;
+
+export async function getServices(): Promise<Service[]> {
+  if (!isDbConfigured()) return FALLBACK_SERVICES;
+  try {
+    return await query<Service>(
+      `SELECT ${SERVICE_COLUMNS} FROM services ORDER BY display_order ASC, created_at ASC`
+    );
+  } catch (err) {
+    console.error("getServices() falling back to seed data:", err);
+    return FALLBACK_SERVICES;
+  }
+}
+
+export async function getServiceBySlug(slug: string): Promise<Service | null> {
+  if (!isDbConfigured()) {
+    return FALLBACK_SERVICES.find((s) => s.slug === slug) ?? null;
+  }
+  try {
+    const rows = await query<Service>(
+      `SELECT ${SERVICE_COLUMNS} FROM services WHERE slug = $1 LIMIT 1`,
+      [slug]
+    );
+    return rows[0] ?? null;
+  } catch (err) {
+    console.error("getServiceBySlug() falling back to seed data:", err);
+    return FALLBACK_SERVICES.find((s) => s.slug === slug) ?? null;
+  }
+}
 
 export async function getProducts(): Promise<Product[]> {
   if (!isDbConfigured()) return FALLBACK_PRODUCTS;

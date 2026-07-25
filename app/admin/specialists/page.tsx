@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Specialist } from "@/lib/types";
 
 const EMPTY_FORM = {
@@ -10,6 +10,13 @@ const EMPTY_FORM = {
   external_profile_url: "", clinic: "Physionnisa Central Clinic", linked_email: "",
 };
 
+type BulkResult = {
+  total: number;
+  succeeded: number;
+  failed: number;
+  results: { row: number; slug: string; status: "ok" | "error"; message?: string }[];
+};
+
 export default function AdminSpecialistsPage() {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +24,9 @@ export default function AdminSpecialistsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function loadSpecialists() {
     setLoading(true);
@@ -91,6 +101,30 @@ export default function AdminSpecialistsPage() {
     loadSpecialists();
   }
 
+  async function handleBulkUpload() {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+    setBulkUploading(true);
+    setBulkResult(null);
+    try {
+      const text = await file.text();
+      const res = await fetch("/api/admin/specialists/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "text/csv" },
+        body: text,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Bulk upload failed");
+      setBulkResult(data);
+      loadSpecialists();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Bulk upload failed");
+    } finally {
+      setBulkUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-ink">Specialists</h1>
@@ -104,6 +138,39 @@ export default function AdminSpecialistsPage() {
       </div>
 
       {error && <div className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+
+      <div className="mt-6 card p-6">
+        <p className="font-semibold text-ink">Bulk Upload via CSV</p>
+        <p className="mt-1 text-sm text-muted">
+          Required columns: <code className="text-xs">slug, name, title</code>. Optional:{" "}
+          <code className="text-xs">photo_url, photo_alt, bio, years_experience, languages,
+          credentials, license_number, license_authority, education (semicolon-separated),
+          specializations (comma-separated), memberships (comma-separated),
+          external_profile_url, clinic, linked_email</code>.
+          Matching an existing <code className="text-xs">slug</code> updates that profile.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="text-sm" />
+          <button onClick={handleBulkUpload} disabled={bulkUploading} className="btn-primary !py-2">
+            {bulkUploading ? "Uploading…" : "Upload CSV"}
+          </button>
+        </div>
+        {bulkResult && (
+          <div className="mt-4 rounded-xl bg-sand p-4 text-sm">
+            <p className="font-medium text-ink">
+              {bulkResult.succeeded} of {bulkResult.total} rows saved
+              {bulkResult.failed > 0 ? `, ${bulkResult.failed} failed` : ""}.
+            </p>
+            {bulkResult.failed > 0 && (
+              <ul className="mt-2 space-y-1 text-xs text-red-700">
+                {bulkResult.results.filter((r) => r.status === "error").map((r) => (
+                  <li key={r.row}>Row {r.row} ({r.slug}): {r.message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-6 card p-6">
         <p className="font-semibold text-ink">{editingId ? "Edit Specialist" : "Add a Specialist"}</p>

@@ -176,12 +176,28 @@ Products carry the standard Merchant Center feed attributes (`brand`, `gtin`, `m
   feed straight from MotherDuck. Register that URL as a **Scheduled fetch** feed in
   Merchant Center → Products → Feeds.
 - Specialist pages similarly carry `schema.org/Person` JSON-LD with credentials,
-  education, and memberships — see §9.
+  education, and memberships — see the admin panel section below.
+- Service pages carry `schema.org/MedicalTherapy` JSON-LD.
 
-## 9. Admin panel (`/admin`)
+## 9. Services (`/services`) and the admin panel (`/admin`)
 
-A password-protected panel for managing products and specialist profiles without writing
-SQL by hand.
+Services are now a first-class, database-backed entity — not hardcoded — matching
+products and specialists:
+
+- **`/services`** — public index of every clinical service (Pelvic Health Therapy,
+  Post-Natal Recovery, Sports Injury Rehab, etc.), each linking to its own detail page.
+- **`/services/[slug]`** — detail page with duration, price, full description, a
+  benefits list, and a **"Book This Service"** CTA that deep-links to
+  `/booking?service=<slug>`, which preselects that service in the booking form's
+  dropdown.
+- The booking form's **Service Type** dropdown is populated live from `/api/services` —
+  add, edit, or reorder services in the admin panel and the booking form updates
+  automatically, no code changes needed.
+- **`/admin/services`** — add/edit/delete services one at a time, or bulk-upload via CSV
+  (see `services-sample.csv` in the repo root — same pattern as products).
+
+A password-protected panel for managing products, services, and specialist profiles
+without writing SQL by hand.
 
 **Setup:** set `ADMIN_PASSWORD` (and optionally a separate `ADMIN_SESSION_SECRET`) in your
 environment, then visit `/admin/login`. Auth is a signed, stateless session cookie (HMAC,
@@ -190,17 +206,21 @@ environment, then visit `/admin/login`. Auth is a signed, stateless session cook
 - **`/admin`** — dashboard showing live MotherDuck connection status and row counts
   (same data as `/api/health`, presented for humans).
 - **`/admin/products`** — add/edit/delete products one at a time, or bulk-upload via CSV.
-  A sample file matching the expected columns is included at `products-sample.csv` in the
-  repo root. Only `slug`, `name`, `category`, and `price_pkr` are required per row; the
-  Google Shopping columns are optional and default sensibly (`brand: Physionnisa`,
-  `condition_gs: new`, `availability_gs: in stock`). Uploading a slug that already exists
-  updates that product instead of duplicating it.
-- **`/admin/specialists`** — add/edit/delete specialist profiles, including the
-  credential/education/membership fields that feed the structured data on the public
-  profile page. The form includes an inline reminder to keep this content accurate and
-  verifiable, in line with Google's guidance on health-related (YMYL) content and E-E-A-T
-  (Experience, Expertise, Authoritativeness, Trustworthiness) — real license numbers,
-  real institutions, no unverifiable claims.
+  `products-20.csv` in the repo root has 20 ready-to-upload products across Recovery
+  Essentials, Clinical Equipment, and Wellness & Supplements, each with full Google
+  Shopping fields filled in. Only `slug`, `name`, `category`, and `price_pkr` are
+  required per row; uploading a slug that already exists updates that product.
+- **`/admin/services`** — see above. `services-sample.csv` has 6 ready-to-upload
+  services.
+- **`/admin/specialists`** — add/edit/delete specialist profiles one at a time, or
+  bulk-upload via CSV (`specialists-sample.csv` has 6 profiles across Pelvic Health,
+  Sports Injury, Prenatal, Orthopedic/Chronic Pain, General Assessment, and Post-Natal
+  Recovery, each with real-shaped E-E-A-T fields). The single-add form includes an
+  inline reminder to keep this content accurate and verifiable, in line with Google's
+  guidance on health-related (YMYL) content and E-E-A-T (Experience, Expertise,
+  Authoritativeness, Trustworthiness) — real license numbers, real institutions, no
+  unverifiable claims. Both the form and CSV support **Linked Account Email** to connect
+  a profile to a specialist's portal login (see §10).
 - The admin panel requires MotherDuck to be connected (there's no seed-data fallback for
   writes) — `/api/health` will tell you if it isn't yet.
 - `middleware.ts` protects everything under `/admin/*` and `/api/admin/*` except the
@@ -298,18 +318,22 @@ app/
   login/page.tsx                    Patient/specialist login
   signup/page.tsx                   Patient/specialist signup
   account/page.tsx                  Portal (renders Patient or Specialist view)
+  services/page.tsx                Services index
+  services/[slug]/page.tsx         Service detail (+ MedicalTherapy JSON-LD, booking CTA)
   admin/                             Password-protected admin panel
     login/page.tsx
     page.tsx                         Dashboard (DB health)
     products/page.tsx                Product CRUD + CSV bulk upload
-    specialists/page.tsx             Specialist CRUD + portal account linking
+    services/page.tsx                Service CRUD + CSV bulk upload
+    specialists/page.tsx             Specialist CRUD + CSV bulk upload + portal linking
   api/                               MotherDuck-backed API routes
     health/route.ts                  Connection diagnostics
     feed/google-shopping/route.ts    Merchant Center XML feed
+    services/                        Public services list/detail
     auth/                            signup, login, logout, me
     patient/                         bookings, orders, notes (own history)
     specialist/                      bookings, notes (assigned patients)
-    admin/                           Protected by middleware.ts
+    admin/                           Protected by middleware.ts (incl. services, specialists bulk)
 components/                     Shared UI + client-side forms
   PatientPortal.tsx / SpecialistPortal.tsx   Account portal views
 context/CartContext.tsx         Global cart state
@@ -327,7 +351,9 @@ lib/
   types.ts                       Shared TS types
 middleware.ts                   Protects /admin and /api/admin
 schema.sql                      MotherDuck table definitions + seed data
-products-sample.csv             Sample file for the bulk-upload feature
+products-20.csv                 20 sample products with full Google Shopping fields
+services-sample.csv             6 sample services
+specialists-sample.csv          6 sample specialists across categories
 ```
 
 ## 15. Notes

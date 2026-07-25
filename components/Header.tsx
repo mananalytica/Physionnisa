@@ -8,6 +8,7 @@ import { track } from "@/lib/dataLayer";
 
 const NAV = [
   { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
   { href: "/booking", label: "Booking" },
   { href: "/specialists", label: "Specialists" },
   { href: "/shop", label: "Shop" },
@@ -30,7 +31,7 @@ export default function Header() {
           Physionnisa
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {NAV.map((item) => {
             const active =
               item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);

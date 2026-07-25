@@ -60,6 +60,22 @@ export type BlogPost = {
   published_at: string | null;
 };
 
+export type Service = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string | null;
+  short_desc: string | null;
+  long_desc: string | null;
+  duration_minutes: number;
+  price_pkr: number;
+  icon: string | null;
+  image_url: string | null;
+  benefits: string | null; // semicolon-separated
+  is_featured?: boolean;
+  display_order?: number;
+};
+
 export type CartItem = {
   productId: string;
   slug: string;

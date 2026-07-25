@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import BookingForm from "@/components/BookingForm";
-import { SERVICE_RATES } from "@/lib/data";
+import { getServices } from "@/lib/queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Booking — Physionnisa" };
+export const revalidate = 300;
 
 const PATH = [
   { icon: "🔍", step: "01. Discovery", title: "Initial Consultation", copy: "An introductory call or brief session to understand your goals and background." },
@@ -14,10 +16,12 @@ const PATH = [
 ];
 
 function formatPKR(v: number) {
-  return `Rs ${v.toLocaleString("en-PK")}`;
+  return `Rs ${Number(v).toLocaleString("en-PK")}`;
 }
 
-export default function BookingPage() {
+export default async function BookingPage() {
+  const services = await getServices();
+
   return (
     <div className="container-page py-14">
       <div className="mx-auto max-w-2xl text-center">
@@ -75,20 +79,28 @@ export default function BookingPage() {
       </div>
 
       <div className="mt-16">
-        <h2 className="text-2xl font-bold text-ink">Service Rates</h2>
-        <p className="mt-2 text-sm text-muted">
-          We believe in transparent clinical pricing without hidden fees.
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-ink">Our Services &amp; Rates</h2>
+            <p className="mt-2 text-sm text-muted">
+              We believe in transparent clinical pricing without hidden fees.
+            </p>
+          </div>
+          <Link href="/services" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+            View full service details →
+          </Link>
+        </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {SERVICE_RATES.map((s, i) => (
-            <div
-              key={s.id}
-              className={`card p-5 ${i === 0 ? "border-l-4 border-l-brand-500" : ""}`}
+          {services.map((s, i) => (
+            <Link
+              key={s.slug}
+              href={`/services/${s.slug}`}
+              className={`card p-5 hover:shadow-soft ${i === 0 ? "border-l-4 border-l-brand-500" : ""}`}
             >
-              <p className="font-semibold text-ink">{s.name}</p>
-              <p className="mt-1 text-sm text-muted">{s.duration} · {s.detail}</p>
+              <p className="font-semibold text-ink">{s.icon} {s.name}</p>
+              <p className="mt-1 text-sm text-muted">{s.duration_minutes} Minutes · {s.category || s.short_desc}</p>
               <p className="mt-3 text-lg font-bold text-brand-600">{formatPKR(s.price_pkr)}</p>
-            </div>
+            </Link>
           ))}
         </div>
 

@@ -212,6 +212,23 @@ CREATE TABLE IF NOT EXISTS treatment_notes (
 -- (users and treatment_notes are brand new tables — CREATE TABLE IF NOT EXISTS
 --  above already handles them, just re-run this whole file.)
 
+CREATE TABLE IF NOT EXISTS services (
+    id                VARCHAR PRIMARY KEY,
+    slug              VARCHAR UNIQUE NOT NULL,
+    name              VARCHAR NOT NULL,
+    category          VARCHAR,            -- e.g. Pelvic Health, Post-Natal, Sports Injury, Orthopedic
+    short_desc        VARCHAR,
+    long_desc         VARCHAR,
+    duration_minutes  INTEGER DEFAULT 60,
+    price_pkr         DECIMAL(10, 2) NOT NULL,
+    icon              VARCHAR,           -- emoji shown on cards, e.g. "🤰"
+    image_url         VARCHAR,
+    benefits          VARCHAR,           -- semicolon-separated bullet points for the detail page
+    is_featured       BOOLEAN DEFAULT FALSE,
+    display_order     INTEGER DEFAULT 0,
+    created_at        TIMESTAMP DEFAULT current_timestamp
+);
+
 -- Seed data -------------------------------------------------------------
 
 INSERT INTO specialists (
@@ -255,6 +272,55 @@ VALUES
   'Physionnisa', NULL, 'FR-HD-01', 'new', 'in stock',
   'Sporting Goods > Exercise & Fitness > Massage Tools',
   'Recovery Essentials > Massage')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO services (
+  id, slug, name, category, short_desc, long_desc, duration_minutes, price_pkr,
+  icon, image_url, benefits, is_featured, display_order
+)
+VALUES
+ ('sv_initial', 'initial-consultation', 'Initial Consultation & Assessment', 'General',
+  'Your first visit — a full movement and history assessment plus first treatment.',
+  'A comprehensive 60-minute evaluation where your physiotherapist reviews your medical history, conducts a full movement and postural assessment, and begins your first treatment. You leave with a clear, personalized recovery plan.',
+  60, 34000, '🔍',
+  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1000&q=80',
+  'Full clinical history review; Movement and postural assessment; Personalized recovery roadmap; First hands-on treatment included',
+  true, 1),
+ ('sv_pelvic', 'pelvic-health-therapy', 'Pelvic Health & Pelvic Floor Therapy', 'Pelvic Health',
+  'Treatment for incontinence, pelvic pain, and pelvic floor dysfunction.',
+  'Specialized, discreet treatment for pelvic floor dysfunction — including stress incontinence, pelvic organ prolapse, and chronic pelvic pain — using manual therapy, biofeedback, and targeted muscle re-education.',
+  60, 38000, '♀',
+  'https://images.unsplash.com/photo-1573497491765-dccce02b29df?w=1000&q=80',
+  'Biofeedback-guided pelvic floor training; Manual therapy for pelvic pain; Bladder and bowel symptom management; Discreet, women-only clinical setting',
+  true, 2),
+ ('sv_postnatal', 'post-natal-recovery', 'Post-Natal Recovery Program', 'Post-Natal',
+  'Structured recovery for Diastasis Recti and post-delivery core restoration.',
+  'A progressive rehabilitation program for the weeks and months after delivery — rebuilding core and pelvic floor strength, closing Diastasis Recti safely, and restoring function for daily life and exercise.',
+  60, 34000, '🤰',
+  'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=1000&q=80',
+  'Diastasis Recti assessment and closure plan; Core and pelvic floor restoration; Safe return-to-exercise guidance; C-section scar mobilization available',
+  true, 3),
+ ('sv_prenatal', 'prenatal-physiotherapy', 'Prenatal Physiotherapy', 'Pregnancy',
+  'Pregnancy-safe movement, pain relief, and birth-prep guidance for every trimester.',
+  'Trimester-adapted physiotherapy to manage pregnancy-related back and pelvic pain, maintain safe activity levels, and prepare your body for labor and delivery.',
+  45, 28000, '🧘‍♀️',
+  'https://images.unsplash.com/photo-1518310952931-b1de897abd40?w=1000&q=80',
+  'Trimester-specific exercise plans; Pregnancy-related back/pelvic pain relief; Birth preparation techniques; Safe for all trimesters with physician clearance',
+  false, 4),
+ ('sv_sports', 'sports-injury-rehabilitation', 'Sports Injury Rehabilitation', 'Sports Injury',
+  'Biomechanical assessment and return-to-sport programs for active women.',
+  'Advanced injury assessment and rehabilitation for female athletes and active women — from ACL prevention and hip mechanics to a structured, sport-specific return-to-play program.',
+  60, 36000, '🏃‍♀️',
+  'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1000&q=80',
+  'Biomechanical movement analysis; ACL injury prevention protocols; Sport-specific return-to-play plans; Performance and strength testing',
+  false, 5),
+ ('sv_pain', 'chronic-pain-orthopedic', 'Chronic Pain & Orthopedic Rehabilitation', 'Orthopedic',
+  'Extended sessions for complex, long-standing musculoskeletal pain.',
+  'For complex or long-standing musculoskeletal cases — chronic back pain, joint conditions, or post-surgical rehabilitation — this extended 90-minute session allows time for thorough hands-on treatment and a multi-week care plan.',
+  90, 45000, '🦴',
+  'https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=1000&q=80',
+  'Extended 90-minute hands-on sessions; Post-surgical rehabilitation; Multi-week structured care plans; Coordination with referring physicians',
+  false, 6)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO blog_posts (id, slug, title, category, excerpt, body, cover_image, author, published_at)

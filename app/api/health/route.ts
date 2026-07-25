@@ -7,12 +7,15 @@ export const dynamic = "force-dynamic";
 const TABLES = [
   "specialists",
   "products",
+  "services",
   "blog_posts",
   "bookings",
   "orders",
   "order_items",
   "contact_messages",
   "newsletter_subscribers",
+  "users",
+  "treatment_notes",
 ] as const;
 
 /**

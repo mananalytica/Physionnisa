@@ -78,11 +78,17 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <Link href="/admin/products" className="card p-6 hover:shadow-soft">
           <p className="font-semibold text-ink">Manage Products →</p>
           <p className="mt-1 text-sm text-muted">
             Add products one at a time, edit existing ones, or bulk-upload via CSV.
+          </p>
+        </Link>
+        <Link href="/admin/services" className="card p-6 hover:shadow-soft">
+          <p className="font-semibold text-ink">Manage Services →</p>
+          <p className="mt-1 text-sm text-muted">
+            Clinical offerings shown on /services and in the booking form's service picker.
           </p>
         </Link>
         <Link href="/admin/specialists" className="card p-6 hover:shadow-soft">

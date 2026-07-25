@@ -1,4 +1,4 @@
-import type { BlogPost, Product, Specialist } from "./types";
+import type { BlogPost, Product, Service, Specialist } from "./types";
 
 export const FALLBACK_SPECIALISTS: Specialist[] = [
   {
@@ -227,29 +227,119 @@ export const FALLBACK_BLOG_POSTS: BlogPost[] = [
   },
 ];
 
-export const SERVICE_RATES = [
+export const FALLBACK_SERVICES: Service[] = [
   {
-    id: "initial",
-    name: "Initial Consultation",
-    duration: "60 Minutes",
-    detail: "Assessment + First Treatment",
+    id: "sv_initial",
+    slug: "initial-consultation",
+    name: "Initial Consultation & Assessment",
+    category: "General",
+    short_desc: "Your first visit — a full movement and history assessment plus first treatment.",
+    long_desc:
+      "A comprehensive 60-minute evaluation where your physiotherapist reviews your medical history, conducts a full movement and postural assessment, and begins your first treatment. You leave with a clear, personalized recovery plan.",
+    duration_minutes: 60,
     price_pkr: 34000,
+    icon: "🔍",
+    image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1000&q=80",
+    benefits:
+      "Full clinical history review; Movement and postural assessment; Personalized recovery roadmap; First hands-on treatment included",
+    is_featured: true,
+    display_order: 1,
   },
   {
-    id: "follow_up",
-    name: "Follow-up Session",
-    duration: "45 Minutes",
-    detail: "Focused Therapy",
-    price_pkr: 24000,
+    id: "sv_pelvic",
+    slug: "pelvic-health-therapy",
+    name: "Pelvic Health & Pelvic Floor Therapy",
+    category: "Pelvic Health",
+    short_desc: "Treatment for incontinence, pelvic pain, and pelvic floor dysfunction.",
+    long_desc:
+      "Specialized, discreet treatment for pelvic floor dysfunction — including stress incontinence, pelvic organ prolapse, and chronic pelvic pain — using manual therapy, biofeedback, and targeted muscle re-education.",
+    duration_minutes: 60,
+    price_pkr: 38000,
+    icon: "♀",
+    image_url: "https://images.unsplash.com/photo-1573497491765-dccce02b29df?w=1000&q=80",
+    benefits:
+      "Biofeedback-guided pelvic floor training; Manual therapy for pelvic pain; Bladder and bowel symptom management; Discreet, women-only clinical setting",
+    is_featured: true,
+    display_order: 2,
   },
   {
-    id: "extended",
-    name: "Extended Treatment",
-    duration: "90 Minutes",
-    detail: "Complex Cases",
+    id: "sv_postnatal",
+    slug: "post-natal-recovery",
+    name: "Post-Natal Recovery Program",
+    category: "Post-Natal",
+    short_desc: "Structured recovery for Diastasis Recti and post-delivery core restoration.",
+    long_desc:
+      "A progressive rehabilitation program for the weeks and months after delivery — rebuilding core and pelvic floor strength, closing Diastasis Recti safely, and restoring function for daily life and exercise.",
+    duration_minutes: 60,
+    price_pkr: 34000,
+    icon: "🤰",
+    image_url: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=1000&q=80",
+    benefits:
+      "Diastasis Recti assessment and closure plan; Core and pelvic floor restoration; Safe return-to-exercise guidance; C-section scar mobilization available",
+    is_featured: true,
+    display_order: 3,
+  },
+  {
+    id: "sv_prenatal",
+    slug: "prenatal-physiotherapy",
+    name: "Prenatal Physiotherapy",
+    category: "Pregnancy",
+    short_desc: "Pregnancy-safe movement, pain relief, and birth-prep guidance for every trimester.",
+    long_desc:
+      "Trimester-adapted physiotherapy to manage pregnancy-related back and pelvic pain, maintain safe activity levels, and prepare your body for labor and delivery.",
+    duration_minutes: 45,
+    price_pkr: 28000,
+    icon: "🧘‍♀️",
+    image_url: "https://images.unsplash.com/photo-1518310952931-b1de897abd40?w=1000&q=80",
+    benefits:
+      "Trimester-specific exercise plans; Pregnancy-related back/pelvic pain relief; Birth preparation techniques; Safe for all trimesters with physician clearance",
+    is_featured: false,
+    display_order: 4,
+  },
+  {
+    id: "sv_sports",
+    slug: "sports-injury-rehabilitation",
+    name: "Sports Injury Rehabilitation",
+    category: "Sports Injury",
+    short_desc: "Biomechanical assessment and return-to-sport programs for active women.",
+    long_desc:
+      "Advanced injury assessment and rehabilitation for female athletes and active women — from ACL prevention and hip mechanics to a structured, sport-specific return-to-play program.",
+    duration_minutes: 60,
+    price_pkr: 36000,
+    icon: "🏃‍♀️",
+    image_url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1000&q=80",
+    benefits:
+      "Biomechanical movement analysis; ACL injury prevention protocols; Sport-specific return-to-play plans; Performance and strength testing",
+    is_featured: false,
+    display_order: 5,
+  },
+  {
+    id: "sv_pain",
+    slug: "chronic-pain-orthopedic",
+    name: "Chronic Pain & Orthopedic Rehabilitation",
+    category: "Orthopedic",
+    short_desc: "Extended sessions for complex, long-standing musculoskeletal pain.",
+    long_desc:
+      "For complex or long-standing musculoskeletal cases — chronic back pain, joint conditions, or post-surgical rehabilitation — this extended 90-minute session allows time for thorough hands-on treatment and a multi-week care plan.",
+    duration_minutes: 90,
     price_pkr: 45000,
+    icon: "🦴",
+    image_url: "https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=1000&q=80",
+    benefits:
+      "Extended 90-minute hands-on sessions; Post-surgical rehabilitation; Multi-week structured care plans; Coordination with referring physicians",
+    is_featured: false,
+    display_order: 6,
   },
 ];
+
+/** @deprecated kept only so nothing crashes if referenced from a stale import; use FALLBACK_SERVICES / getServices() instead. */
+export const SERVICE_RATES = FALLBACK_SERVICES.map((s) => ({
+  id: s.slug,
+  name: s.name,
+  duration: `${s.duration_minutes} Minutes`,
+  detail: s.short_desc || "",
+  price_pkr: s.price_pkr,
+}));
 
 /** Checkout tax/service-fee rate — shown on both the checkout page and the thank-you summary. */
 export const CHECKOUT_TAX_RATE = 0.086;

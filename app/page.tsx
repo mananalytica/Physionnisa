@@ -107,13 +107,13 @@ export default function HomePage() {
               and physical demands.
             </p>
           </div>
-          <Link href="/booking" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/services" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
             View All Services →
           </Link>
         </div>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
-          <div className="relative overflow-hidden rounded-2xl">
+          <div className="relative overflow-hidden rounded-xl">
             <div className="relative aspect-[5/4]">
               <Image
                 src="https://images.unsplash.com/photo-1573497491765-dccce02b29df?w=900&q=80"
@@ -129,29 +129,29 @@ export default function HomePage() {
                 Specialized treatment for dysfunction, pain, and strengthening
                 the pelvic floor at any age.
               </p>
-              <Link href="/booking" className="mt-3 inline-block text-sm font-semibold text-brand-600">
+              <Link href="/services/pelvic-health-therapy" className="mt-3 inline-block text-sm font-semibold text-brand-600">
                 Learn More →
               </Link>
             </div>
           </div>
 
           <div className="grid gap-6">
-            <div className="card p-6">
+            <Link href="/services/sports-injury-rehabilitation" className="card p-6 hover:shadow-soft">
               <p className="mb-2 text-lg">🏃‍♀️</p>
               <p className="font-semibold text-ink">Sports Injury Recovery</p>
               <p className="mt-1 text-sm text-muted">
                 Advanced biomechanical assessment and rehab for female athletes
                 and active women.
               </p>
-            </div>
-            <div className="card p-6">
+            </Link>
+            <Link href="/services/post-natal-recovery" className="card p-6 hover:shadow-soft">
               <p className="mb-2 text-lg">🤰</p>
               <p className="font-semibold text-ink">Pre &amp; Post-Natal Care</p>
               <p className="mt-1 text-sm text-muted">
                 Guidance through pregnancy and recovery to help your body
                 transition safely.
               </p>
-            </div>
+            </Link>
           </div>
         </div>
       </section>

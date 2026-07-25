@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { track } from "@/lib/dataLayer";
-import { SERVICE_RATES } from "@/lib/data";
 import { validateEmail, validatePhone, validateAddress, formatAddress } from "@/lib/addressValidator";
-import type { Specialist } from "@/lib/types";
+import type { Service, Specialist } from "@/lib/types";
 
 const REFERRAL_SOURCES = [
   "Instagram / Facebook",
@@ -22,30 +21,41 @@ const GENERAL_TIPS = [
   "Bring your CNIC and any relevant scan reports (MRI/X-ray).",
 ];
 
+// Extra tips layered on top of GENERAL_TIPS, keyed by service slug.
 const SERVICE_TIPS: Record<string, string[]> = {
-  initial: [
+  "initial-consultation": [
     "This is a 60-minute deep-dive — come with a list of your main symptoms and when they started.",
-    "If this relates to pregnancy or delivery, bring your delivery date/type if applicable.",
   ],
-  follow_up: [
-    "Bring your home exercise log or note any changes since your last session.",
-    "Wear the same or similar footwear you've been training in, if relevant.",
+  "pelvic-health-therapy": [
+    "Wear comfortable, loose bottoms and expect a private, one-on-one session.",
   ],
-  extended: [
-    "Extended sessions are for complex cases — bring any prior imaging, referral letters, or specialist reports.",
-    "Plan for 90 minutes; you may want to arrange transport/childcare accordingly.",
+  "post-natal-recovery": [
+    "If this relates to delivery, bring your delivery date and delivery type (vaginal/C-section) if applicable.",
+  ],
+  "prenatal-physiotherapy": [
+    "Bring your latest antenatal checkup details and any movement restrictions from your OB/GYN.",
+  ],
+  "sports-injury-rehabilitation": [
+    "Wear the same or similar footwear you train in, and bring any prior imaging if available.",
+  ],
+  "chronic-pain-orthopedic": [
+    "Extended sessions run 90 minutes — bring prior imaging, referral letters, or specialist reports.",
   ],
 };
 
 type MeResponse = { user: { full_name: string; email: string; phone: string | null } | null };
 type Errors = Record<string, string>;
 
-export default function BookingForm() {
+function BookingFormInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselectedService = searchParams.get("service");
+
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Errors>({});
-  const [serviceType, setServiceType] = useState(SERVICE_RATES[0].id);
+  const [services, setServices] = useState<Service[]>([]);
+  const [serviceSlug, setServiceSlug] = useState(preselectedService || "");
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [country, setCountry] = useState("Pakistan");
   const [prefill, setPrefill] = useState<{ fullName: string; email: string; phone: string }>({
@@ -55,6 +65,15 @@ export default function BookingForm() {
   });
 
   useEffect(() => {
+    fetch("/api/services")
+      .then((r) => r.json())
+      .then((d) => {
+        const list: Service[] = d.services || [];
+        setServices(list);
+        if (!serviceSlug && list.length > 0) setServiceSlug(list[0].slug);
+      })
+      .catch(() => {});
+
     fetch("/api/specialists")
       .then((r) => r.json())
       .then((d) => setSpecialists(d.specialists || []))
@@ -72,6 +91,7 @@ export default function BookingForm() {
         }
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -90,9 +110,7 @@ export default function BookingForm() {
       country,
     };
 
-    const fieldErrors: Errors = {
-      ...validateAddress(fields),
-    };
+    const fieldErrors: Errors = { ...validateAddress(fields) };
     const emailErr = validateEmail(fields.email);
     if (emailErr) fieldErrors.email = emailErr;
     const phoneErr = validatePhone(fields.phone, country);
@@ -106,7 +124,7 @@ export default function BookingForm() {
     setErrors({});
     setStatus("submitting");
 
-    const service = SERVICE_RATES.find((s) => s.id === serviceType)!;
+    const service = services.find((s) => s.slug === serviceSlug);
     const payload = {
       fullName: fields.fullName,
       email: fields.email,
@@ -117,8 +135,8 @@ export default function BookingForm() {
       postalCode: fields.postalCode,
       country: fields.country,
       address: formatAddress(fields),
-      serviceType: service.name,
-      servicePrice: service.price_pkr,
+      serviceType: service?.name || serviceSlug,
+      servicePrice: service?.price_pkr,
       specialistId: String(form.get("specialistId") || "") || undefined,
       preferredDate: String(form.get("preferredDate") || ""),
       reason: String(form.get("reason") || ""),
@@ -152,7 +170,7 @@ export default function BookingForm() {
     }
   }
 
-  const tips = [...(SERVICE_TIPS[serviceType] || []), ...GENERAL_TIPS];
+  const tips = [...(SERVICE_TIPS[serviceSlug] || []), ...GENERAL_TIPS];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -240,11 +258,11 @@ export default function BookingForm() {
             <label className="label" htmlFor="serviceType">Service Type</label>
             <select
               id="serviceType" name="serviceType" className="input"
-              value={serviceType} onChange={(e) => setServiceType(e.target.value)}
+              value={serviceSlug} onChange={(e) => setServiceSlug(e.target.value)}
             >
-              {SERVICE_RATES.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} (Rs {s.price_pkr.toLocaleString()})
+              {services.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name} (Rs {Number(s.price_pkr).toLocaleString()})
                 </option>
               ))}
             </select>
@@ -298,5 +316,13 @@ export default function BookingForm() {
         </ul>
       </div>
     </div>
+  );
+}
+
+export default function BookingForm() {
+  return (
+    <Suspense fallback={<div className="card p-8 text-center text-muted">Loading booking form…</div>}>
+      <BookingFormInner />
+    </Suspense>
   );
 }

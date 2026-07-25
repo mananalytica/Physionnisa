@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from "next/server";
+import { isDbConfigured, query } from "@/lib/db";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const UPDATABLE_FIELDS = [
+  "slug", "name", "category", "short_desc", "long_desc", "duration_minutes",
+  "price_pkr", "icon", "image_url", "benefits", "is_featured", "display_order",
+] as const;
+
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  if (!isDbConfigured()) {
+    return NextResponse.json({ error: "MotherDuck is not configured. See /api/health." }, { status: 503 });
+  }
+  try {
+    const body = await req.json();
+    const updates = UPDATABLE_FIELDS.filter((f) => f in body);
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No updatable fields provided" }, { status: 400 });
+    }
+
+    const setClause = updates.map((f, i) => `${f} = $${i + 1}`).join(", ");
+    const values = updates.map((f) => body[f]);
+
+    await query(`UPDATE services SET ${setClause} WHERE id = $${updates.length + 1}`, [
+      ...values,
+      params.id,
+    ]);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("PATCH /api/admin/services/[id] failed:", err);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  if (!isDbConfigured()) {
+    return NextResponse.json({ error: "MotherDuck is not configured. See /api/health." }, { status: 503 });
+  }
+  try {
+    await query(`DELETE FROM services WHERE id = $1`, [params.id]);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE /api/admin/services/[id] failed:", err);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+}
